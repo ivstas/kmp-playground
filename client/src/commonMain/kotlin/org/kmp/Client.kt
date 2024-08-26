@@ -18,12 +18,20 @@ fun shareServerPort(): Int {
 @JsExport
 fun printServerFlow() {
     GlobalScope.launch {
-        connect()
+        try {
+            connect()
+        } catch (e: Exception) {
+            println("Error: $e")
+        }
     }
 }
 
 private suspend fun connect() {
-    val rpcClient = HttpClient { installRPC() }.rpc {
+    val rpcClient = HttpClient {
+        installRPC {
+            waitForServices = true
+        }
+    }.rpc {
         url {
             host = "localhost"
             port = SERVER_PORT
