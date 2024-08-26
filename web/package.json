@@ -1,0 +1,24 @@
+{
+  "name": "kmp-playground-web",
+  "private": true,
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/react": "18.3.4",
+    "@types/react-dom": "18.3.0",
+    "@vitejs/plugin-react": "4.3.1",
+    "typescript": "5.5.4",
+    "vite": "5.4.2"
+  },
+  "dependencies": {
+    "kmp-playground-client": "file:../client/build/dist/js/productionLibrary",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  }
+}
