@@ -20,7 +20,7 @@ fun Application.module() {
         get("/") {
             call.respondText("Ktor: ${Greeting().greet()}")
         }
-        rpc("/awesome") {
+        rpc(RPC_PATH) {
             rpcConfig {
                 serialization {
                     json()

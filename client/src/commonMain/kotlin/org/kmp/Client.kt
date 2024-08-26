@@ -27,7 +27,7 @@ private suspend fun connect() {
         url {
             host = "localhost"
             port = SERVER_PORT
-            encodedPath = "/awesome"
+            encodedPath = RPC_PATH
         }
 
         rpcConfig {
