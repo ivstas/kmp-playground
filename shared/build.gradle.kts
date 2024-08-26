@@ -20,6 +20,10 @@ kotlin {
             }
         }
     }
+
+    js {
+        browser()
+    }
     
     jvm()
     
