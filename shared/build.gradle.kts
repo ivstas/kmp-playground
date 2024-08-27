@@ -6,6 +6,8 @@ plugins {
 
 kotlin {
     js {
+        generateTypeScriptDefinitions()
+        useEsModules()
         browser()
     }
     
