@@ -1,54 +1,31 @@
 package org.kmp
-import io.ktor.client.*
-import io.ktor.http.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.rpc.withService
-import kotlinx.rpc.serialization.json
+import kotlinx.coroutines.*
 import kotlinx.rpc.streamScoped
-import kotlinx.rpc.transport.ktor.client.installRPC
-import kotlinx.rpc.transport.ktor.client.rpc
-import kotlinx.rpc.transport.ktor.client.rpcConfig
+import kotlinx.rpc.withService
 
 @JsExport
-fun shareServerPort(): Int {
-    return SERVER_PORT
-}
+class Client {
+    private val job = Job()
+    private val scope = CoroutineScope(Dispatchers.Default + job)
 
-@JsExport
-fun printServerFlow() {
-    GlobalScope.launch {
-        try {
-            connect()
-        } catch (e: Exception) {
-            println("Error: $e")
-        }
-    }
-}
+    val api = scope.promise<Api> {
+        val rpcClient = connectToServer()
 
-private suspend fun connect() {
-    val rpcClient = HttpClient {
-        installRPC {
-            waitForServices = true
-        }
-    }.rpc {
-        url {
-            host = "localhost"
-            port = SERVER_PORT
-            encodedPath = RPC_PATH
-        }
-
-        rpcConfig {
-            serialization {
-                json()
+        object: Api {
+            override fun listenToMessageFlow(collector: (value: String) -> Unit) {
+                rpcClient.launch {
+                    streamScoped {
+                        rpcClient.withService<AwesomeService>().getNews("KotlinBurg").collect(collector)
+                    }
+                }
             }
         }
     }
 
-    streamScoped {
-        rpcClient.withService<AwesomeService>().getNews("KotlinBurg").collect { article ->
-            println(article)
-        }
-    }
+    fun close() = job.cancel()
+}
 
+@JsExport
+interface Api {
+    fun listenToMessageFlow(collector: (value: String) -> Unit)
 }
