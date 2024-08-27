@@ -17,7 +17,7 @@
     "vite": "5.4.2"
   },
   "dependencies": {
-    "kmp-playground-client": "file:../client/build/dist/js/productionLibrary",
+    "kmp-playground-client": "file:../client/build/dist/js/developmentLibrary",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   }
