@@ -12,6 +12,10 @@ kotlin {
 
         browser {
             binaries.library()
+
+            commonWebpackConfig {
+                sourceMaps = true
+            }
         }
     }
 

@@ -8,7 +8,13 @@ kotlin {
     js {
         generateTypeScriptDefinitions()
         useEsModules()
-        browser()
+        browser {
+            binaries.library()
+
+            commonWebpackConfig {
+                sourceMaps = true
+            }
+        }
     }
     
     jvm()
