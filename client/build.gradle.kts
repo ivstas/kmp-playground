@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+
 version = "0.1"
 
 plugins {
@@ -6,7 +8,7 @@ plugins {
 }
 
 kotlin {
-    js(IR) {
+    js {
         generateTypeScriptDefinitions()
         useEsModules()
 
@@ -16,6 +18,11 @@ kotlin {
             commonWebpackConfig {
                 sourceMaps = true
             }
+        }
+
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+        compilerOptions {
+            freeCompilerArgs.add("-Xstrict-implicit-export-types")
         }
     }
 

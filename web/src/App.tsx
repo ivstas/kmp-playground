@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Api } from 'kmp-playground-client';
+import { Api, KtorRPCClient } from 'kmp-playground-client';
 
-export function App({ api }: { api: Api }) {
+export function App({ rpcClient }: { rpcClient: KtorRPCClient }) {
     const [messages, setMessages] = useState([] as string[])
 
     // todo: unsubscribe
     useEffect(() => {
-        console.log('listening to messages')
+        const api = new Api(rpcClient)
         api.listenToMessageFlow((message) => {
             setMessages((messages) => [...messages, message])
         })

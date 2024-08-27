@@ -1,17 +1,17 @@
-import { Api, Client } from "kmp-playground-client";
+import { Client, KtorRPCClient } from "kmp-playground-client";
 import React, { ReactNode, useEffect, useState } from "react";
 
 interface ClientConnectionProps {
-    children: (client: Api) => ReactNode
+    children: (rpcClient: KtorRPCClient) => ReactNode
 }
 
 export function ClientConnection({ children }: ClientConnectionProps) {
-    const [api, setApi] = useState<false | Api>(false);
+    const [rpcClient, setRpcClient] = useState<false | KtorRPCClient>(false);
 
     useEffect(() => {
         const client = new Client()
 
-        client.api.then(setApi)
+        client.rpcClient.then(setRpcClient)
 
         return () =>{
             client.close()
@@ -20,9 +20,9 @@ export function ClientConnection({ children }: ClientConnectionProps) {
 
     return (
         <div>
-            {(api === false)
+            {(rpcClient === false)
                 ? (<h1>connecting...</h1>)
-                : children(api)
+                : children(rpcClient)
             }
         </div>
     )

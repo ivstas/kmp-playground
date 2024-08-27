@@ -11,8 +11,8 @@ if (rootEl == null) {
 createRoot(rootEl).render(
     <StrictMode>
         <ClientConnection>
-            {api => (
-                <App api={api}/>
+            {rpcClient => (
+                <App rpcClient={rpcClient}/>
             )}
         </ClientConnection>
     </StrictMode>
