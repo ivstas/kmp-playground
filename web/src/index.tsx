@@ -1,7 +1,7 @@
-import React, { StrictMode } from 'react'
+import React from 'react'
 import {createRoot} from 'react-dom/client';
-import {App} from './App.js'
-import { ClientConnection } from "./ClientConnection.tsx";
+import {Messages} from './Messages.tsx'
+import { WithKtorClient } from "./WithKtorClient.tsx";
 
 const rootEl = document.getElementById('root');
 if (rootEl == null) {
@@ -9,11 +9,9 @@ if (rootEl == null) {
 }
 
 createRoot(rootEl).render(
-    <StrictMode>
-        <ClientConnection>
-            {rpcClient => (
-                <App rpcClient={rpcClient}/>
-            )}
-        </ClientConnection>
-    </StrictMode>
+    <WithKtorClient>
+        {client => (
+            <Messages rpcClient={client}/>
+        )}
+    </WithKtorClient>
 );

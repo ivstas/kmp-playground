@@ -1,16 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { Api, KtorRPCClient } from 'kmp-playground-client';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ScopeProxy, MessageApi, KtorRPCClient } from 'kmp-playground-client';
+import { useDisposable } from "./hooks.ts";
 
-export function App({ rpcClient }: { rpcClient: KtorRPCClient }) {
+export function Messages({ rpcClient }: { rpcClient: KtorRPCClient }) {
+    const scope = useDisposable(() => new ScopeProxy()).scope
+    const messageApi = useMemo(() => new MessageApi(rpcClient), [rpcClient])
     const [messages, setMessages] = useState([] as string[])
 
-    // todo: unsubscribe
     useEffect(() => {
-        const api = new Api(rpcClient)
-        api.listenToMessageFlow((message) => {
+        messageApi.listenToMessageFlow(scope, (message) => {
             setMessages((messages) => [...messages, message])
         })
-    }, [])
+    }, [messageApi, scope])
 
     return (
         <div>
