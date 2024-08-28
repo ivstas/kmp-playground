@@ -2,6 +2,7 @@ package org.kmp
 
 import io.ktor.client.*
 import io.ktor.http.*
+import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.promise
@@ -31,7 +32,7 @@ private suspend fun connectToServer(): KtorRPCClient {
 
     return httpClient.rpc {
         url {
-            host = "localhost"
+            host = window.location.hostname
             port = SERVER_PORT
             encodedPath = RPC_PATH
         }

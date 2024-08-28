@@ -5,7 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "vite"
+    "build:production": "vite build",
+    "build:watch": "vite -w build"
   },
   "author": "",
   "license": "ISC",

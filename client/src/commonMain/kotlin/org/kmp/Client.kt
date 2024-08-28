@@ -18,27 +18,6 @@ class MessageApi(private val rpcClient: KtorRPCClient) {
     }
 }
 
-private var counter = 0
-
-@JsExport
-@Suppress("MemberVisibilityCanBePrivate")
-class DisposableChecker: Disposable {
-    var isDisposed = false
-    val uniqueCounter = ++counter
-
-    override fun dispose() {
-        if (isDisposed) {
-            throw IllegalStateException("Already disposed")
-        }
-        println("disposed checker $uniqueCounter")
-
-        isDisposed = true
-    }
-}
-
-@JsExport
-fun isScopeActive(scope: CoroutineScope): Boolean = scope.isActive // fixme
-
 @JsExport
 class ScopeProxy: Disposable {
     private val job = Job()
