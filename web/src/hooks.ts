@@ -1,4 +1,4 @@
-import { Disposable } from "kmp-playground-client";
+import { Disposable, CoroutineScope, ScopeProxy } from "kmp-playground-client";
 import { createSignal, onCleanup } from "solid-js";
 import type { Accessor } from "solid-js";
 
@@ -10,6 +10,10 @@ export function useDisposable<T extends Disposable>(createDisposable: () => T): 
     })
 
     return disposable
+}
+
+export function useCoroutineScope(): CoroutineScope {
+    return useDisposable(() => new ScopeProxy()).scope
 }
 
 export type Loading<T> = {

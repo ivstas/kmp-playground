@@ -1,5 +1,5 @@
-import { connectToServerPromise, KtorRPCClient, ScopeProxy } from "kmp-playground-client";
-import { useDisposable, useLoading } from "./hooks.ts";
+import { connectToServerPromise, KtorRPCClient } from "kmp-playground-client";
+import { useCoroutineScope, useLoading } from "./hooks.ts";
 import { Loader } from "./Loader.tsx";
 import type { Component, JSX } from 'solid-js';
 
@@ -8,7 +8,7 @@ interface WithKtorClientProps {
 }
 
 export const WithKtorClient: Component<WithKtorClientProps> = (props) => {
-    const scope = useDisposable(() => new ScopeProxy()).scope
+    const scope = useCoroutineScope()
 
     const ktorClientLoading = useLoading(connectToServerPromise(scope))
 

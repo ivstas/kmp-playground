@@ -1,5 +1,5 @@
-import { ScopeProxy, MessageApi, KtorRPCClient } from 'kmp-playground-client';
-import { useDisposable } from "./hooks.ts";
+import { MessageApi, KtorRPCClient } from 'kmp-playground-client';
+import { useCoroutineScope } from "./hooks.ts";
 import { Component, createSignal, For, Show } from "solid-js";
 
 interface MessagesProps {
@@ -7,7 +7,7 @@ interface MessagesProps {
 }
 
 export const Messages: Component<MessagesProps> = (props) => {
-    const scope = useDisposable(() => new ScopeProxy()).scope
+    const scope = useCoroutineScope()
 
     const [messages, setMessages] = createSignal<string[]>([])
 
