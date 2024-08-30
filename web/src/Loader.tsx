@@ -1,15 +1,19 @@
-import React, { ReactNode } from "react";
 import { Loading } from "./hooks.ts";
+import type { JSX } from "solid-js";
+
 
 interface LoaderProps<T> {
     loadingState: Loading<T>
-    children: (loaded: T) => ReactNode
+    children: (loaded: T) => JSX.Element
 }
 
-export function Loader<T>({ loadingState, children }: LoaderProps<T>) {
-    if (loadingState.isLoading) {
-        return <h1>loading...</h1>
-    }
-
-    return children(loadingState.value)
-}
+export const Loader = <T,>(props: LoaderProps<T>) => {
+    return (
+        <div>
+            {props.loadingState.isLoading
+                ? (<span>Loading...</span>)
+                : props.children(props.loadingState.value)
+            }
+        </div>
+    );
+};

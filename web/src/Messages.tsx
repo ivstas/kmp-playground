@@ -1,31 +1,33 @@
-import React, { useEffect, useMemo, useState } from 'react';
 import { ScopeProxy, MessageApi, KtorRPCClient } from 'kmp-playground-client';
 import { useDisposable } from "./hooks.ts";
+import { Component, createSignal, For, Show } from "solid-js";
 
-export function Messages({ rpcClient }: { rpcClient: KtorRPCClient }) {
+interface MessagesProps {
+    rpcClient: KtorRPCClient
+}
+
+export const Messages: Component<MessagesProps> = (props) => {
     const scope = useDisposable(() => new ScopeProxy()).scope
-    const messageApi = useMemo(() => new MessageApi(rpcClient), [rpcClient])
-    const [messages, setMessages] = useState([] as string[])
 
-    useEffect(() => {
-        messageApi.listenToMessageFlow(scope, (message) => {
-            setMessages((messages) => [...messages, message])
-        })
-    }, [messageApi, scope])
+    const [messages, setMessages] = createSignal<string[]>([])
+
+    const api = new MessageApi(props.rpcClient)
+    api.listenToMessageFlow(scope, (message) => {
+        setMessages((messages) => [...messages, message])
+    })
+
+    const isEmpty = () => messages().length === 0
 
     return (
         <div>
             <h1>Received messages</h1>
-            {messages.length === 0
-                ? <p>no messages</p>
-                : (
-                    <ul>
-                        {messages.map((message, i) => (
-                            <li key={i}>{message}</li>
-                        ))}
-                    </ul>
-                )
-            }
+            <Show when={!isEmpty()} fallback={<p>no messages</p>}>
+                <For each={messages()}>
+                    {(message) => (
+                        <li>{message}</li>
+                    )}
+                </For>
+            </Show>
         </div>
     )
 }

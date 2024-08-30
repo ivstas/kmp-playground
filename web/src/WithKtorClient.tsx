@@ -1,20 +1,20 @@
 import { KtorRPCClient, ScopeProxy, connectToServerPromise } from "kmp-playground-client";
-import React, { ReactNode } from "react";
 import { useDisposable, useLoading } from "./hooks.ts";
 import { Loader } from "./Loader.tsx";
+import type { Component, JSX } from 'solid-js';
 
 interface WithKtorClientProps {
-    children: (rpcClient: KtorRPCClient) => ReactNode
+    children: (rpcClient: KtorRPCClient) => JSX.Element
 }
 
-export function WithKtorClient({children}: WithKtorClientProps) {
+export const WithKtorClient: Component<WithKtorClientProps> = (props) => {
     const scope = useDisposable(() => new ScopeProxy()).scope
 
-    const ktorClientLoading = useLoading(() => connectToServerPromise(scope), [scope])
+    const ktorClientLoading = useLoading(() => connectToServerPromise(scope),)
 
     return (
-        <Loader loadingState={ktorClientLoading}>
-            {(rpcClient) => children(rpcClient)}
+        <Loader loadingState={ktorClientLoading()}>
+            {(rpcClient) => props.children(rpcClient)}
         </Loader>
     )
 }

@@ -1,16 +1,15 @@
-import { DependencyList, useEffect, useState } from "react";
 import { Disposable } from "kmp-playground-client";
+import { createSignal, onCleanup } from "solid-js";
+import type { Accessor } from "solid-js";
 
 export function useDisposable<T extends Disposable>(createDisposable: () => T): T {
-    const [state] = useState<T>(createDisposable)
+    const disposable = createDisposable()
 
-    useEffect(() => {
-        return () => {
-            state.dispose()
-        }
-    }, [])
+    onCleanup(() => {
+        disposable.dispose()
+    })
 
-    return state
+    return disposable
 }
 
 export type Loading<T> = {
@@ -20,15 +19,13 @@ export type Loading<T> = {
     value: T
 }
 
-export function useLoading<T>(load: () => Promise<T>, deps: DependencyList = []): Loading<T> {
-    const [loadingState, setLoadingState] = useState<Loading<T>>({ isLoading: true })
+export function useLoading<T>(load: () => Promise<T>): Accessor<Loading<T>> {
+    const [loadingState, setLoadingState] = createSignal<Loading<T>>({ isLoading: true })
 
-    useEffect(() => {
-        // todo: handler errors
-        load().then(value => {
-            setLoadingState({ isLoading: false, value })
-        })
-    }, deps); // todo: should I include load in deps?
+    // todo: handler errors
+    load().then(value => {
+        setLoadingState({ isLoading: false, value })
+    })
 
     return loadingState
 }
