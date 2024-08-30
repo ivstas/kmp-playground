@@ -19,11 +19,11 @@ export type Loading<T> = {
     value: T
 }
 
-export function useLoading<T>(load: () => Promise<T>): Accessor<Loading<T>> {
+export function useLoading<T>(promise: Promise<T>): Accessor<Loading<T>> {
     const [loadingState, setLoadingState] = createSignal<Loading<T>>({ isLoading: true })
 
-    // todo: handler errors
-    load().then(value => {
+    // todo: handle errors
+    promise.then(value => {
         setLoadingState({ isLoading: false, value })
     })
 
