@@ -11,7 +11,7 @@ export const Loader = <T,>(props: LoaderProps<T>) => {
     return (
         <div>
             {props.loadingState.isLoading
-                ? (<span>Loading...</span>)
+                ? (<span class="text-3xl font-bold underline">Loading...</span>)
                 : props.children(props.loadingState.value)
             }
         </div>

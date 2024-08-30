@@ -1,3 +1,4 @@
+import './index.css';
 import {Messages} from './Messages.tsx'
 import { WithKtorClient } from "./WithKtorClient.tsx";
 
