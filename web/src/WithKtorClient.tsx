@@ -1,7 +1,8 @@
 import { connectToServerPromise, KtorRPCClient } from "kmp-playground-client";
-import { useCoroutineScope, useLoading } from "./hooks.ts";
-import { Loader } from "./Loader.tsx";
+import { useCoroutineScope } from "./hooks.ts";
+import { ResourceState } from "./Loader.tsx";
 import type { Component, JSX } from 'solid-js';
+import { createResource } from "solid-js";
 
 interface WithKtorClientProps {
     children: (rpcClient: KtorRPCClient) => JSX.Element
@@ -10,11 +11,11 @@ interface WithKtorClientProps {
 export const WithKtorClient: Component<WithKtorClientProps> = (props) => {
     const scope = useCoroutineScope()
 
-    const ktorClientLoading = useLoading(connectToServerPromise(scope))
+    const [clientLoadingResource] = createResource(() => connectToServerPromise(scope))
 
     return (
-        <Loader loadingState={ktorClientLoading()}>
+        <ResourceState resource={clientLoadingResource}>
             {(rpcClient) => props.children(rpcClient)}
-        </Loader>
+        </ResourceState>
     )
 }

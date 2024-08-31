@@ -1,19 +1,17 @@
-import { Loading } from "./hooks.ts";
 import type { JSX } from "solid-js";
+import { Resource, Show } from "solid-js";
 
 
-interface LoaderProps<T> {
-    loadingState: Loading<T>
+interface ResourceStateProps<T> {
+    resource: Resource<T>
     children: (loaded: T) => JSX.Element
 }
 
-export const Loader = <T,>(props: LoaderProps<T>) => {
+export function ResourceState<T>(props: ResourceStateProps<T>): JSX.Element {
     return (
-        <div>
-            {props.loadingState.isLoading
-                ? (<span class="text-3xl font-bold underline">Loading...</span>)
-                : props.children(props.loadingState.value)
-            }
-        </div>
-    );
-};
+        <Show when={!props.resource.loading} fallback={<span>loading...</span>}>
+            {/* this would break if the resource has an "unresolved" state */}
+            {props.children(props.resource()!!)}
+        </Show>
+    )
+}
