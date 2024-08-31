@@ -24,6 +24,7 @@ class MessageApi(private val rpcClient: KtorRPCClient) {
 @Suppress("unused")
 @JsExport
 class IssueApi(private val rpcClient: KtorRPCClient) {
+    @OptIn(DelicateCoroutinesApi::class)
     fun addIssue(issueIn: IssueIn, scope: CoroutineScope = GlobalScope): Promise<Long> {
         return scope.promise {
             rpcClient.withService<IssueApi>().addIssue(issueIn)

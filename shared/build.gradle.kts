@@ -27,6 +27,9 @@ kotlin {
     jvm()
     
     sourceSets {
+        all {
+            languageSettings.optIn("kotlin.js.ExperimentalJsExport")
+        }
         commonMain.dependencies {
             // put your Multiplatform dependencies here
             implementation(libs.kotlinx.rpc.core)
