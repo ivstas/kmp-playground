@@ -5,6 +5,7 @@ import kotlinx.coroutines.*
 import kotlinx.rpc.streamScoped
 import kotlinx.rpc.transport.ktor.client.KtorRPCClient
 import kotlinx.rpc.withService
+import org.kmp.api.AwesomeApi
 
 @Suppress("unused")
 @JsExport
@@ -12,7 +13,7 @@ class MessageApi(private val rpcClient: KtorRPCClient) {
     fun listenToMessageFlow(scope: CoroutineScope, collector: (value: String) -> Unit) {
         scope.launch {
             streamScoped {
-                rpcClient.withService<AwesomeService>().getNews("KotlinBurg").collect(collector)
+                rpcClient.withService<AwesomeApi>().getNews("KotlinBurg").collect(collector)
             }
         }
     }

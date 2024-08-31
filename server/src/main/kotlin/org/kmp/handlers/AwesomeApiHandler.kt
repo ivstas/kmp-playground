@@ -1,10 +1,11 @@
-package org.kmp
+package org.kmp.handlers
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
+import org.kmp.api.AwesomeApi
 import kotlin.coroutines.CoroutineContext
 
-class AwesomeServiceImpl(override val coroutineContext: CoroutineContext) : AwesomeService {
+class AwesomeApiHandler(override val coroutineContext: CoroutineContext) : AwesomeApi {
     override suspend fun getNews(city: String) = flow {
         delay(500)
         emit("Today is 23 degrees!")

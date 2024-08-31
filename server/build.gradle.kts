@@ -20,6 +20,9 @@ dependencies {
     implementation(libs.kotlinx.rpc.krpc.server)
     implementation(libs.kotlinx.rpc.krpc.serialization.json)
     implementation(libs.kotlinx.rpc.krpc.ktor.server)
+    implementation(libs.exposed.core)
+    implementation(libs.exposed.jdbc)
+    implementation("com.h2database:h2:2.2.224")
 
     testImplementation(libs.ktor.server.tests)
     testImplementation(libs.kotlin.test.junit)
