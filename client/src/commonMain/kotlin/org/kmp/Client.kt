@@ -6,6 +6,8 @@ import kotlinx.rpc.streamScoped
 import kotlinx.rpc.transport.ktor.client.KtorRPCClient
 import kotlinx.rpc.withService
 import org.kmp.api.AwesomeApi
+import org.kmp.api.IssueApi
+import kotlin.js.Promise
 
 @Suppress("unused")
 @JsExport
@@ -15,6 +17,22 @@ class MessageApi(private val rpcClient: KtorRPCClient) {
             streamScoped {
                 rpcClient.withService<AwesomeApi>().getNews("KotlinBurg").collect(collector)
             }
+        }
+    }
+}
+
+@Suppress("unused")
+@JsExport
+class IssueApi(private val rpcClient: KtorRPCClient) {
+    fun addIssue(issueIn: IssueIn, scope: CoroutineScope = GlobalScope): Promise<Long> {
+        return scope.promise {
+            rpcClient.withService<IssueApi>().addIssue(issueIn)
+        }
+    }
+
+    fun getIssues(scope: CoroutineScope): Promise<Array<Issue>> {
+        return scope.promise {
+            rpcClient.withService<IssueApi>().getIssues().toTypedArray()
         }
     }
 }

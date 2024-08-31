@@ -4,6 +4,7 @@ import { WithKtorClient } from "./WithKtorClient.tsx";
 
 import { render } from 'solid-js/web';
 import { MainPage } from "./pages/main.tsx";
+import { Issues } from "./pages/Issues.tsx";
 
 const rootEl = document.getElementById('root');
 if (rootEl == null) {
@@ -16,6 +17,7 @@ render(
             {client => (
                 <MainPage>
                     <Messages rpcClient={client}/>
+                    <Issues rpcClient={client}/>
                 </MainPage>
             )}
         </WithKtorClient>

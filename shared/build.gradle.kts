@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
+
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.kotlinx.rpc)
@@ -14,6 +16,11 @@ kotlin {
             commonWebpackConfig {
                 sourceMaps = true
             }
+        }
+
+        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+        compilerOptions {
+            freeCompilerArgs.add("-Xstrict-implicit-export-types")
         }
     }
     

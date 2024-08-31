@@ -21,17 +21,19 @@ import org.kmp.db.tables.UsersTable
 import org.kmp.api.AwesomeApi
 import org.kmp.api.IssueApi
 import org.kmp.db.tables.IssuesTable.title
-import org.kmp.domain.IssueIn
 import org.kmp.handlers.AwesomeApiHandler
 import org.kmp.handlers.IssueApiHandler
 import java.io.File
 
 
 fun main() {
-    val db = Database.connect("jdbc:h2:mem:test", driver = "org.h2.Driver")
+    // DB_CLOSE_DELAY=-1 is a hack
+    // preventing in-memory H2 database from removing all the data when transaction closes the connection
+    val db = Database.connect("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", driver = "org.h2.Driver")
 
     transaction(db) {
         SchemaUtils.create(UsersTable, IssuesTable, TagsTable, IssuesTagsTable)
+
         UsersTable.insert {
             it[name] = "John Doe"
         }
