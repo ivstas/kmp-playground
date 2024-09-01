@@ -1,5 +1,5 @@
-import type { JSX } from "solid-js";
-import { Resource, Show } from "solid-js";
+import type { JSX } from 'solid-js';
+import { Resource, Show } from 'solid-js';
 
 
 interface ResourceStateProps<T> {
@@ -8,10 +8,10 @@ interface ResourceStateProps<T> {
 }
 
 export function ResourceState<T>(props: ResourceStateProps<T>): JSX.Element {
-    return (
-        <Show when={!props.resource.loading} fallback={<span>loading...</span>}>
-            {/* this would break if the resource has an "unresolved" state */}
-            {props.children(props.resource()!!)}
-        </Show>
-    )
+   return (
+      <Show when={!props.resource.loading} fallback={<span>loading...</span>}>
+         {/* this would break if the resource has an "unresolved" state */}
+         {props.children(props.resource()!)}
+      </Show>
+   )
 }

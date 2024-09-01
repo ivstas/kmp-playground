@@ -1,16 +1,16 @@
-import { Disposable, CoroutineScope, ScopeProxy } from "kmp-playground-client";
-import { onCleanup } from "solid-js";
+import { Disposable, CoroutineScope, ScopeProxy } from 'kmp-playground-client';
+import { onCleanup } from 'solid-js';
 
 export function useDisposable<T extends Disposable>(createDisposable: () => T): T {
-    const disposable = createDisposable()
+   const disposable = createDisposable()
 
-    onCleanup(() => {
-        disposable.dispose()
-    })
+   onCleanup(() => {
+      disposable.dispose()
+   })
 
-    return disposable
+   return disposable
 }
 
 export function useCoroutineScope(): CoroutineScope {
-    return useDisposable(() => new ScopeProxy()).scope
+   return useDisposable(() => new ScopeProxy()).scope
 }
