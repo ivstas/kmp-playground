@@ -1,5 +1,5 @@
 import './index.css';
-import {Messages} from './Messages.tsx'
+import {Messages} from './pages/Messages.tsx'
 import { WithKtorClient } from "./WithKtorClient.tsx";
 
 import { render } from 'solid-js/web';

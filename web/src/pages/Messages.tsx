@@ -1,12 +1,9 @@
 import { MessageApi, KtorRPCClient } from 'kmp-playground-client';
-import { useCoroutineScope } from "./hooks.ts";
-import { Component, createSignal, For, Show } from "solid-js";
+import { useCoroutineScope } from "../hooks.ts";
+import { createSignal, For, Show } from "solid-js";
 
-interface MessagesProps {
-    rpcClient: KtorRPCClient
-}
 
-export const Messages: Component<MessagesProps> = (props) => {
+export function Messages(props: { rpcClient: KtorRPCClient }) {
     const scope = useCoroutineScope()
 
     const [messages, setMessages] = createSignal<string[]>([])
@@ -21,7 +18,7 @@ export const Messages: Component<MessagesProps> = (props) => {
     return (
         <div>
             <h1>Received messages</h1>
-            <Show when={!isEmpty()} fallback={<p>no messages</p>}>
+            <Show when={!isEmpty()} fallback={<p>no messages yet</p>}>
                 <For each={messages()}>
                     {(message) => (
                         <li>{message}</li>
