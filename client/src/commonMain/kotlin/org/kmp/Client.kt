@@ -7,6 +7,7 @@ import kotlinx.rpc.transport.ktor.client.KtorRPCClient
 import kotlinx.rpc.withService
 import org.kmp.api.AwesomeApi
 import org.kmp.api.IssueApi
+import org.rsp.*
 import kotlin.js.Promise
 
 @Suppress("unused")
@@ -34,6 +35,27 @@ class IssueApi(private val rpcClient: KtorRPCClient) {
     fun getIssues(scope: CoroutineScope): Promise<Array<Issue>> {
         return scope.promise {
             rpcClient.withService<IssueApi>().getIssues().toTypedArray()
+        }
+    }
+
+    fun listenToIssueEvents(
+        scope: CoroutineScope,
+        issueListModificationEventListener: IterableModificationEventListener<Long, Issue>,
+        getIssueChangedEventListener: (id: Long) -> IssueChangedEventListener,
+    ) {
+        scope.promise {
+            streamScoped {
+                val flow = rpcClient.withService<IssueApi>().getIssueEventFlow()
+
+                launch {
+                    flow.listModificationFlow.collect(issueListModificationEventListener::collector)
+                }
+                launch {
+                    flow.issueChangedFlow.collect { (id, event) ->
+                        getIssueChangedEventListener(id).collector(event)
+                    }
+                }
+            }
         }
     }
 }

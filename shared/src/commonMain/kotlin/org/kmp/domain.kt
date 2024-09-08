@@ -16,6 +16,7 @@ data class Issue(
     val id: Long,
     val title: String,
     val assigneeId: Long?,
+    val isCompleted: Boolean,
 )
 
 @Serializable
