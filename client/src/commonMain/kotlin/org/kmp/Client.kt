@@ -7,7 +7,6 @@ import kotlinx.rpc.transport.ktor.client.KtorRPCClient
 import kotlinx.rpc.withService
 import org.kmp.api.AwesomeApi
 import org.kmp.api.IssueApi
-import org.rsp.*
 import kotlin.js.Promise
 
 @Suppress("unused")
@@ -26,7 +25,7 @@ class MessageApi(private val rpcClient: KtorRPCClient) {
 @JsExport
 class IssueApi(private val rpcClient: KtorRPCClient) {
     @OptIn(DelicateCoroutinesApi::class)
-    fun addIssue(issueIn: IssueIn, scope: CoroutineScope = GlobalScope): Promise<Long> {
+    fun addIssue(issueIn: IssueIn, scope: CoroutineScope = GlobalScope): Promise<Int> {
         return scope.promise {
             rpcClient.withService<IssueApi>().addIssue(issueIn)
         }

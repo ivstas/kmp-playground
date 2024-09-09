@@ -44,13 +44,13 @@ interface Issue {
 function useIssues(api: IssueApi, scope: CoroutineScope): Accessor<Issue[]> {
    const [signal, setSignal] = createSignal<Issue[]>([])
 
-   const listListener = new IterableModificationEventListener<any, ApiIssue>(
+   const listListener = new IterableModificationEventListener<number, ApiIssue>(
       (list) => { // onReset
          setSignal(() => list.toArray())
       },
       (item) => { // onAdded
          setSignal(prev => {
-            return [...prev, item] // todo: figure out where to insert
+            return [...prev] // todo: add item
          })
       },
       (id) => { // onRemoved
@@ -84,10 +84,7 @@ function useIssues(api: IssueApi, scope: CoroutineScope): Accessor<Issue[]> {
 
    const listener = new IssuesModificationEventListener(
       listListener,
-      (pair) => {
-         const [id, event] = pair
-         getElementUpdateListener(id).collector(event)
-      },
+      getElementUpdateListener,
    )
 
    api.listenToIssueEvents(scope, listener)

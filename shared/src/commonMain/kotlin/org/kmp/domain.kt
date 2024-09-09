@@ -13,9 +13,9 @@ data class IssueIn(
 @JsExport
 @Serializable
 data class Issue(
-    val id: Long,
+    val id: Int,
     val title: String,
-    val assigneeId: Long?,
+    val assigneeId: Int?,
     val isCompleted: Boolean,
 )
 

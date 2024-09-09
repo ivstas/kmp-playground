@@ -38,9 +38,9 @@ class IssueManager(private val db: Database) {
 
         allIssueSubscriptions.add(subscription)
 
-        scope.toLifetime().callWhenTerminated {
-            allIssueSubscriptions.remove(subscription)
-        }
+//        scope.toLifetime().callWhenTerminated {
+//            allIssueSubscriptions.remove(subscription)
+//        }
 
         // fixme: create a scope from lifetime
         scope.launch {

@@ -11,7 +11,7 @@ class IssueApiHandler(
     override val coroutineContext: CoroutineContext,
     private val issueManager: IssueManager,
 ): IssueApi {
-    override suspend fun addIssue(issueIn: IssueIn): Long {
+    override suspend fun addIssue(issueIn: IssueIn): Int {
         return issueManager.addIssue(issueIn)
     }
 
