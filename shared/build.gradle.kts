@@ -8,20 +8,20 @@ plugins {
 
 kotlin {
     js {
-        generateTypeScriptDefinitions()
-        useEsModules()
+//        generateTypeScriptDefinitions()
+//        useEsModules()
         browser {
-            binaries.library()
-
-            commonWebpackConfig {
-                sourceMaps = true
-            }
+//            binaries.library()
+//
+//            commonWebpackConfig {
+//                sourceMaps = true
+//            }
         }
-
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        compilerOptions {
-            freeCompilerArgs.add("-Xstrict-implicit-export-types")
-        }
+//
+//        @OptIn(ExperimentalKotlinGradlePluginApi::class)
+//        compilerOptions {
+//            freeCompilerArgs.add("-Xstrict-implicit-export-types")
+//        }
     }
     
     jvm()
