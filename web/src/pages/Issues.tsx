@@ -1,4 +1,4 @@
-import type { Issue as ApiIssue } from 'kmp-playground-client';
+import { Issue as ApiIssue, IssuesModificationEventListener } from 'kmp-playground-client';
 import {
    CoroutineScope,
    IssueApi,
@@ -44,9 +44,9 @@ interface Issue {
 function useIssues(api: IssueApi, scope: CoroutineScope): Accessor<Issue[]> {
    const [signal, setSignal] = createSignal<Issue[]>([])
 
-   const listListener = new IterableModificationEventListener<number, ApiIssue>(
+   const listListener = new IterableModificationEventListener<any, ApiIssue>(
       (list) => { // onReset
-         setSignal(() => list)
+         setSignal(() => list.toArray())
       },
       (item) => { // onAdded
          setSignal(prev => {
@@ -82,7 +82,15 @@ function useIssues(api: IssueApi, scope: CoroutineScope): Accessor<Issue[]> {
       );
    }
 
-   api.listenToIssueEvents(scope, listListener, getElementUpdateListener)
+   const listener = new IssuesModificationEventListener(
+      listListener,
+      (pair) => {
+         const [id, event] = pair
+         getElementUpdateListener(id).collector(event)
+      },
+   )
+
+   api.listenToIssueEvents(scope, listener)
 
    return signal
 }

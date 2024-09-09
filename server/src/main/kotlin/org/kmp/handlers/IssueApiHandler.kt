@@ -1,14 +1,10 @@
 package org.kmp.handlers
 
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
-import org.kmp.Issue
-import org.kmp.IssueChangedEvent
-import org.kmp.IssueIn
-import org.kmp.IssueListModificationEvent
-import org.kmp.api.AllIssuesEventFlow
+import org.kmp.*
 import org.kmp.api.IssueApi
 import org.kmp.manager.IssueManager
-import org.rsp.GlobalLifetime
 import kotlin.coroutines.CoroutineContext
 
 class IssueApiHandler(
@@ -23,8 +19,8 @@ class IssueApiHandler(
         return issueManager.getIssues()
     }
 
-    override suspend fun getIssueEventFlow(): AllIssuesEventFlow {
+    override suspend fun getIssueEventFlow(): Flow<IssuesModificationEvent> {
         // todo: generate subscription id, return it alongside with the flow
-        return issueManager.listenToIssues(GlobalLifetime)
+        return issueManager.listenToIssues(GlobalScope)
     }
 }

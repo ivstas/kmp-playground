@@ -40,20 +40,14 @@ class IssueApi(private val rpcClient: KtorRPCClient) {
 
     fun listenToIssueEvents(
         scope: CoroutineScope,
-        issueListModificationEventListener: IterableModificationEventListener<Long, Issue>,
-        getIssueChangedEventListener: (id: Long) -> IssueChangedEventListener,
+        issuesModificationEventListener: IssuesModificationEventListener,
     ) {
         scope.promise {
             streamScoped {
                 val flow = rpcClient.withService<IssueApi>().getIssueEventFlow()
 
                 launch {
-                    flow.listModificationFlow.collect(issueListModificationEventListener::collector)
-                }
-                launch {
-                    flow.issueChangedFlow.collect { (id, event) ->
-                        getIssueChangedEventListener(id).collector(event)
-                    }
+                    flow.collect(issuesModificationEventListener::collector)
                 }
             }
         }
