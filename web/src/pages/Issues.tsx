@@ -44,7 +44,7 @@ interface Issue {
 function useIssues(api: IssueApi, scope: CoroutineScope): Accessor<Issue[]> {
    const [signal, setSignal] = createSignal<Issue[]>([])
 
-   const listListener = new IterableModificationEventListener<number, ApiIssue>(
+   const listListener = new IterableModificationEventListener(
       (list) => { // onReset
          setSignal(() => list.toArray())
       },

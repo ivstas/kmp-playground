@@ -1,8 +1,8 @@
 package org.kmp.manager
 
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.insert
@@ -33,10 +33,18 @@ class IssueManager(private val db: Database) {
 
     private val allIssueSubscriptions = mutableSetOf<Flow<IssuesModificationEvent>>()
 
-    fun listenToIssues(scope: CoroutineScope): Flow<IssuesModificationEvent> {
-        val subscription = MutableSharedFlow<IssuesModificationEvent>()
+    fun listenToIssues(scope: CoroutineScope): IssueListUpdates {
+        val issues = getIssues()
 
-        allIssueSubscriptions.add(subscription)
+        val listChangedFlow = MutableSharedFlow<IterableModificationEvent<Int, Issue>>()
+
+        val subscription = IssueListUpdates(
+            listChangedFlow = listChangedFlow,
+            elementChangedFlow = MutableSharedFlow()
+        )
+
+
+//        allIssueSubscriptions.add(subscription)
 
 //        scope.toLifetime().callWhenTerminated {
 //            allIssueSubscriptions.remove(subscription)
@@ -44,8 +52,11 @@ class IssueManager(private val db: Database) {
 
         // fixme: create a scope from lifetime
         scope.launch {
-            val issues = getIssues()
-            subscription.emit(IssuesModificationEvent.ListModification(IterableModificationEventReset(issues)))
+            delay(1_000)
+            listChangedFlow.emit(IterableModificationEventReset(issues))
+
+            delay(1_000)
+            listChangedFlow.emit(IterableModificationEventRemoved(3))
         }
 
         return subscription

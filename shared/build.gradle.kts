@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.kotlinx.rpc)
+    alias(libs.plugins.kotlinx.rpc) // not platform, it is needed for codegen
     alias(libs.plugins.kotlinPluginSerialization)
 }
 

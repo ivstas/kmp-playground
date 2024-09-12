@@ -1,28 +1,29 @@
 package org.rsp
 
 import kotlinx.serialization.Serializable
+import org.kmp.Issue
 import kotlin.js.JsExport
 
 
 @Serializable
 sealed interface IterableModificationEvent<out ID, out T>
 @Serializable
-data class IterableModificationEventReset<T>(val list: List<T>): IterableModificationEvent<Nothing, T>
+data class IterableModificationEventReset<out T>(val list: List<Issue>): IterableModificationEvent<Nothing, T>
 /** Client should be able to find out where to put new item in the list */
 @Serializable
-data class IterableModificationEventAdded<T>(val item: T): IterableModificationEvent<Nothing, T>
+data class IterableModificationEventAdded<out T>(val item: Issue): IterableModificationEvent<Nothing, T>
 @Serializable
-data class IterableModificationEventRemoved<ID>(val id: ID): IterableModificationEvent<ID, Nothing>
+data class IterableModificationEventRemoved<out ID>(val id: Int): IterableModificationEvent<ID, Nothing>
 
 
 @JsExport
-class IterableModificationEventListener<in ID, in T>(
-    private val onReset: (list: List<T>) -> Unit,
-    private val onAdded: (item: T) -> Unit,
-    private val onRemoved: (id: ID) -> Unit
+class IterableModificationEventListener(
+    private val onReset: (list: List<Issue>) -> Unit,
+    private val onAdded: (item: Issue) -> Unit,
+    private val onRemoved: (id: Int) -> Unit
 ) {
     @Suppress("NON_EXPORTABLE_TYPE")
-    fun collector(event: IterableModificationEvent<ID, T>) {
+    fun collector(event: IterableModificationEvent<Int, Issue>) {
         when (event) {
             is IterableModificationEventAdded -> {
                 onAdded(event.item)

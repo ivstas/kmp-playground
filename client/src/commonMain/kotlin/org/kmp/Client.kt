@@ -7,6 +7,7 @@ import kotlinx.rpc.transport.ktor.client.KtorRPCClient
 import kotlinx.rpc.withService
 import org.kmp.api.AwesomeApi
 import org.kmp.api.IssueApi
+import org.rsp.IterableModificationEventReset
 import kotlin.js.Promise
 
 @Suppress("unused")
@@ -15,7 +16,10 @@ class MessageApi(private val rpcClient: KtorRPCClient) {
     fun listenToMessageFlow(scope: CoroutineScope, collector: (value: String) -> Unit) {
         scope.launch {
             streamScoped {
-                rpcClient.withService<AwesomeApi>().getNews("KotlinBurg").collect(collector)
+                val flow = rpcClient.withService<AwesomeApi>().getNews("KotlinBurg")
+                flow.collect {
+                    collector(it.value)
+                }
             }
         }
     }
@@ -41,13 +45,16 @@ class IssueApi(private val rpcClient: KtorRPCClient) {
         scope: CoroutineScope,
         issuesModificationEventListener: IssuesModificationEventListener,
     ) {
-        scope.promise {
+        scope.launch {
             streamScoped {
-                val flow = rpcClient.withService<IssueApi>().getIssueEventFlow()
+                val updates = rpcClient.withService<IssueApi>().getIssueEventFlow()
 
                 launch {
-                    flow.collect(issuesModificationEventListener::collector)
+                    updates.elementChangedFlow.collect { (id, event) ->
+                        issuesModificationEventListener.getOnElementChangedListener(id).collector(event)
+                    }
                 }
+                updates.listChangedFlow.collect(issuesModificationEventListener.onListChanged::collector)
             }
         }
     }

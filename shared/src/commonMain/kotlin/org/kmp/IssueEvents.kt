@@ -33,22 +33,21 @@ import kotlin.js.JsExport
     }
 }
 
-@Serializable sealed interface IssuesModificationEvent {
-    @Serializable data class ListModification(val listEvent: IterableModificationEvent<Int, Issue>): IssuesModificationEvent
-    @Serializable data class ElementModification(val id: Int, val issueChangedEvent: IssueChangedEvent): IssuesModificationEvent
-}
+@Serializable sealed interface IssuesModificationEvent
+@Serializable data class IssuesModificationEventListModification(val listEvent: IterableModificationEvent<Int, Issue>): IssuesModificationEvent
+@Serializable data class IssuesModificationEventElementModification(val id: Int, val issueChangedEvent: IssueChangedEvent): IssuesModificationEvent
 
 @JsExport class IssuesModificationEventListener (
-    private val onListChanged: IterableModificationEventListener<Int, Issue>,
-    private val getOnElementChangedListener: (Int) -> IssueChangedEventListener,
+    val onListChanged: IterableModificationEventListener,
+    val getOnElementChangedListener: (Int) -> IssueChangedEventListener,
 ) {
     @Suppress("NON_EXPORTABLE_TYPE")
     fun collector(event: IssuesModificationEvent) {
         when (event) {
-            is IssuesModificationEvent.ListModification -> {
+            is IssuesModificationEventListModification -> {
                 onListChanged.collector(event.listEvent)
             }
-            is IssuesModificationEvent.ElementModification -> {
+            is IssuesModificationEventElementModification -> {
                 getOnElementChangedListener(event.id).collector(event.issueChangedEvent)
             }
         }
