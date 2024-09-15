@@ -20,6 +20,10 @@ class IssueApiHandler(
         return issueManager.getIssues()
     }
 
+    override suspend fun getIssue(issueId: Int): Issue? {
+        return issueManager.getIssue(issueId)
+    }
+
     override suspend fun getIssueEventFlow(): IssueListUpdates {
         // todo: generate subscription id, return it alongside with the flow
         return issueManager.listenToIssues(GlobalScope)

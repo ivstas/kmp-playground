@@ -29,6 +29,7 @@
   },
   "dependencies": {
     "kmp-playground-client": "file:../client/build/dist/js/developmentLibrary",
+    "navigo": "8.11.1",
     "solid-js": "1.8.22"
   }
 }

@@ -61,4 +61,17 @@ class IssueManager(private val db: Database) {
 
         return subscription
     }
+
+    fun getIssue(issueId: Int) = transaction(db) {
+        IssuesTable.selectAll().where {
+            IssuesTable.id eq issueId
+        }.map {
+            Issue(
+                id = it[IssuesTable.id].value,
+                title = it[IssuesTable.title],
+                assigneeId = it[IssuesTable.assigneeId],
+                isCompleted = it[IssuesTable.isCompleted]
+            )
+        }.firstOrNull()
+    }
 }

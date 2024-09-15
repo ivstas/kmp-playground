@@ -9,29 +9,27 @@ import {
 import { useCoroutineScope } from '../hooks.ts';
 import type { Accessor, JSX } from 'solid-js';
 import { createSignal, For } from 'solid-js';
+import { onClickNavigateTo } from '../Router.tsx';
 
 
 export function Issues(props: { rpcClient: KtorRPCClient }): JSX.Element {
    const scope = useCoroutineScope()
 
    const api = new IssueApi(props.rpcClient)
-   // const [issuesResource] = createResource(() => api.getIssues(scope))
    const issues = useIssues(api, scope)
 
    return (
       <div>
          <h1>Issues</h1>
-         {/*<ResourceState resource={issuesResource}>*/}
-         {/*   {(issueKtList) => (*/}
          <ul class="menu bg-base-200 rounded-box w-96">
             <For each={issues()}>
                {(issue) => (
-                  <li><a>{issue.title}</a></li>
+                  <li>
+                     <a onClick={onClickNavigateTo(`/issues/${issue.id}`)}>{issue.title}</a>
+                  </li>
                )}
             </For>
          </ul>
-         {/*)}*/}
-         {/*</ResourceState>*/}
       </div>
    )
 }

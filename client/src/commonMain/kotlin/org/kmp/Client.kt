@@ -41,6 +41,13 @@ class IssueApi(private val rpcClient: KtorRPCClient) {
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
+    fun getIssue(issueId: Int, scope: CoroutineScope = GlobalScope): Promise<Issue?> {
+        return scope.promise {
+            rpcClient.withService<IssueApi>().getIssue(issueId)
+        }
+    }
+
     fun listenToIssueEvents(
         scope: CoroutineScope,
         issuesModificationEventListener: IssuesModificationEventListener,
