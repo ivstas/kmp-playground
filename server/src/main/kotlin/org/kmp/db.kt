@@ -1,4 +1,4 @@
-package org.kmp.db.tables
+package org.kmp
 
 import org.jetbrains.exposed.dao.id.CompositeIdTable
 import org.jetbrains.exposed.dao.id.IntIdTable

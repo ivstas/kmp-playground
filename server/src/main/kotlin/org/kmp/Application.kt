@@ -13,13 +13,9 @@ import org.jetbrains.exposed.sql.batchInsert
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.kmp.manager.IssueManager
-import org.kmp.db.tables.IssuesTagsTable
-import org.kmp.db.tables.IssuesTable
-import org.kmp.db.tables.TagsTable
-import org.kmp.db.tables.UsersTable
 import org.kmp.api.AwesomeApi
 import org.kmp.api.IssueApi
-import org.kmp.db.tables.IssuesTable.title
+import org.kmp.IssuesTable.title
 import org.kmp.handlers.AwesomeApiHandler
 import org.kmp.handlers.IssueApiHandler
 

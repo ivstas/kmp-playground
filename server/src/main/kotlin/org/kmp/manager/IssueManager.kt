@@ -9,7 +9,7 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.kmp.*
-import org.kmp.db.tables.IssuesTable
+import org.kmp.IssuesTable
 import org.rsp.*
 
 
