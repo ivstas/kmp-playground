@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build:production": "vite build",
-    "build:watch": "vite -w build"
+    "dev": "vite"
   },
   "author": "",
   "license": "ISC",

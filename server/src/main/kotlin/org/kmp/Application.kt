@@ -2,7 +2,6 @@ package org.kmp
 
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
-import io.ktor.server.http.content.*
 import io.ktor.server.netty.*
 import io.ktor.server.routing.*
 import kotlinx.rpc.serialization.json
@@ -23,7 +22,6 @@ import org.kmp.api.IssueApi
 import org.kmp.db.tables.IssuesTable.title
 import org.kmp.handlers.AwesomeApiHandler
 import org.kmp.handlers.IssueApiHandler
-import java.io.File
 
 
 fun main() {
@@ -65,7 +63,6 @@ fun main() {
                 registerService<AwesomeApi> { ctx -> AwesomeApiHandler(ctx) }
                 registerService<IssueApi> { ctx -> IssueApiHandler(ctx, issueService) }
             }
-            staticFiles("/", File("web/dist"))
         }
     }.start(wait = true)
 }
