@@ -23,11 +23,13 @@ export function Issues(props: { rpcClient: KtorRPCClient }): JSX.Element {
          <h1>Issues</h1>
          {/*<ResourceState resource={issuesResource}>*/}
          {/*   {(issueKtList) => (*/}
-         <For each={issues()}>
-            {(issue) => (
-               <li>{issue.title}</li>
-            )}
-         </For>
+         <ul class="menu bg-base-200 rounded-box w-96">
+            <For each={issues()}>
+               {(issue) => (
+                  <li><a>{issue.title}</a></li>
+               )}
+            </For>
+         </ul>
          {/*)}*/}
          {/*</ResourceState>*/}
       </div>
