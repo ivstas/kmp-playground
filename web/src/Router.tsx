@@ -1,4 +1,4 @@
-import { Accessor, Component, createSignal, JSX } from 'solid-js';
+import { createSignal } from 'solid-js';
 
 import Navigo from 'navigo'; // When using ES modules.
 
@@ -8,6 +8,8 @@ export type Page = {
 } | {
     page: 'issues-single',
     issueId: string
+} | {
+    page: 'main',
 }
 
 const router = new Navigo('/');
@@ -24,6 +26,9 @@ router
       } else {
          setSignal({ page: 'issues-single', issueId: issueId })
       }
+   })
+   .on('/', () => {
+      setSignal({ page: 'main' })
    })
 
 router.resolve()

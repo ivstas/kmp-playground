@@ -1,0 +1,17 @@
+@layer map {
+    .svg-map > svg {
+        width: 100%;
+        height: auto;
+    }
+    /* fixme prefix */
+    .svg-map g[id^="parked-"] {
+        cursor: pointer;
+
+        border: 1px solid #000;
+
+        &:hover {
+            border-color: #f00;
+        }
+    }
+}
+
