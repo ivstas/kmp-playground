@@ -2,7 +2,7 @@ import DOMPurify from 'dompurify';
 
 import { createResource } from 'solid-js';
 import { ResourceState } from '../Loader.tsx';
-import './Main.css';
+import styles from './Main.module.css'
 
 async function loadFileAsString(url: string) {
    try {
@@ -39,8 +39,7 @@ function SanitiseSvg(props: { svgAsString: string }) {
    });
 
    return (
-      <div
-         class="svg-map"
+      <div class={styles.map}
          innerHTML={cleanSVG}
          onClick={(e) => {
             for (const candidate of ancestorIterator(e.target)) {
@@ -50,7 +49,7 @@ function SanitiseSvg(props: { svgAsString: string }) {
                }
             }
          }}
-      ></div>
+      />
    )
 }
 
