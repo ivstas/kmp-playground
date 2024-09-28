@@ -1,28 +1,22 @@
-import { ResourceState } from '../Loader.tsx';
-import { createResource, Show } from 'solid-js';
-import { useCoroutineScope } from '../hooks.ts';
+import {  withLoader } from '../Loader.tsx';
+import { useRequest } from '../hooks.ts';
 import { IssueApi } from 'kmp-playground-client';
 import type { KtorRPCClient } from 'kmp-playground-client';
-import type { JSX } from 'solid-js'
+import { PageLayout } from './PageLayout.tsx';
 
-export function IssuesSingle(props: { rpcClient: KtorRPCClient, issueId: number }): JSX.Element {
-   const scope = useCoroutineScope()
-
+export function IssuesSingle(props: { rpcClient: KtorRPCClient, issueId: number }) {
    const api = new IssueApi(props.rpcClient)
-   const [issueResource] = createResource(() => api.getIssue(props.issueId, scope))
+   const issueResource = useRequest(scope => api.getIssue(props.issueId, scope))
 
    return (
-      <div>
-         <h1>Issue</h1>
-         <ResourceState resource={issueResource}>
-            {(issue) => (
-               <Show when={issue} fallback={<div>Issue {props.issueId} not found</div>}>
-                  {(issue) => (
-                     <h2>{issue().title}</h2>
-                  )}
-               </Show>
+      <PageLayout>
+         <div>
+            <h1>Issue</h1>
+            {withLoader(issueResource, (issue) => issue
+               ? <h2>{issue.title}</h2>
+               : <div>Issue {props.issueId} not found</div>,
             )}
-         </ResourceState>
-      </div>
+         </div>
+      </PageLayout>
    )
 }

@@ -1,36 +1,34 @@
-import { Issue as ApiIssue, IssuesModificationEventListener } from 'kmp-playground-client';
+import { Issue as ApiIssue, IssuesModificationEventListener, ScopeProxy } from 'kmp-playground-client';
 import {
-   CoroutineScope,
    IssueApi,
    IssueChangedEventListener,
    IterableModificationEventListener,
    KtorRPCClient,
 } from 'kmp-playground-client';
-import { useCoroutineScope } from '../hooks.ts';
-import type { Accessor, JSX } from 'solid-js';
-import { createSignal, For } from 'solid-js';
-import { onClickNavigateTo } from '../Router.tsx';
+import { useNavigateToHref } from '../Router.tsx';
+import { useEffect, useState } from 'react';
+import { PageLayout } from './PageLayout.tsx';
 
 
 export function Issues(props: { rpcClient: KtorRPCClient }): JSX.Element {
-   const scope = useCoroutineScope()
-
    const api = new IssueApi(props.rpcClient)
-   const issues = useIssues(api, scope)
+   const issues = useIssues(api)
+
+   const navigateToHref = useNavigateToHref()
 
    return (
-      <div>
-         <h1>Issues</h1>
-         <ul class="menu bg-base-200 rounded-box w-96">
-            <For each={issues()}>
-               {(issue) => (
-                  <li>
-                     <a onClick={onClickNavigateTo(`/issues/${issue.id}`)}>{issue.title}</a>
+      <PageLayout>
+         <div>
+            <h1>Issues</h1>
+            <ul className="menu bg-base-200 rounded-box w-96">
+               {issues.map((issue) => (
+                  <li key={issue.id}>
+                     <a href={`/issues/${issue.id}`} onClick={navigateToHref}>{issue.title}</a>
                   </li>
-               )}
-            </For>
-         </ul>
-      </div>
+               ))}
+            </ul>
+         </div>
+      </PageLayout>
    )
 }
 
@@ -41,8 +39,8 @@ interface Issue {
    isCompleted: boolean
 }
 
-function useIssues(api: IssueApi, scope: CoroutineScope): Accessor<Issue[]> {
-   const [signal, setSignal] = createSignal<Issue[]>([])
+function useIssues(api: IssueApi): Issue[] {
+   const [signal, setSignal] = useState<Issue[]>([])
 
    const listListener = new IterableModificationEventListener(
       (list) => { // onReset
@@ -87,7 +85,15 @@ function useIssues(api: IssueApi, scope: CoroutineScope): Accessor<Issue[]> {
       getElementUpdateListener,
    )
 
-   api.listenToIssueEvents(scope, listener)
+   useEffect(() => {
+      const scopeProxy = new ScopeProxy()
+
+      api.listenToIssueEvents(scopeProxy.scope, listener)
+
+      return () => {
+         scopeProxy.dispose()
+      }
+   }, []);
 
    return signal
 }

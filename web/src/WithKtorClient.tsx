@@ -1,21 +1,13 @@
 import { connectToServerPromise, KtorRPCClient } from 'kmp-playground-client';
-import { useCoroutineScope } from './hooks.ts';
-import { ResourceState } from './Loader.tsx';
-import type { Component, JSX } from 'solid-js';
-import { createResource } from 'solid-js';
+import { useRequest } from './hooks.ts';
+import {  withLoader } from './Loader.tsx';
 
 interface WithKtorClientProps {
     children: (rpcClient: KtorRPCClient) => JSX.Element
 }
 
-export const WithKtorClient: Component<WithKtorClientProps> = (props) => {
-   const scope = useCoroutineScope()
+export function WithKtorClient({ children }: WithKtorClientProps) {
+   const clientLoadingResource = useRequest(scope => connectToServerPromise(scope))
 
-   const [clientLoadingResource] = createResource(() => connectToServerPromise(scope))
-
-   return (
-      <ResourceState resource={clientLoadingResource}>
-         {(rpcClient) => props.children(rpcClient)}
-      </ResourceState>
-   )
+   return withLoader(clientLoadingResource, children)
 }

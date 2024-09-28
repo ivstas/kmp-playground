@@ -1,17 +1,19 @@
-import type { JSX } from 'solid-js';
-import { Resource, Show } from 'solid-js';
+import { ReactNode } from 'react';
 
-
-interface ResourceStateProps<T> {
-    resource: Resource<T>
-    children: (loaded: T) => JSX.Element
+export type Loading<T> = {
+    isLoading: true,
+} | {
+    isLoading: false,
+    data: T,
 }
 
-export function ResourceState<T>(props: ResourceStateProps<T>): JSX.Element {
-   return (
-      <Show when={!props.resource.loading} fallback={<span>loading...</span>}>
-         {/* this would break if the resource has an "unresolved" state */}
-         {props.children(props.resource()!)}
-      </Show>
-   )
+
+export function withLoader<T>(
+   loading: Loading<T>,
+   renderLoaded: (loaded: T) => ReactNode,
+): ReactNode {
+   return loading.isLoading
+      ? <span className="loading loading-dots loading-lg"></span>
+      : renderLoaded(loading.data)
 }
+

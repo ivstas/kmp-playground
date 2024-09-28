@@ -1,47 +1,31 @@
-import { Disposable, CoroutineScope, ScopeProxy } from 'kmp-playground-client';
-import { createSignal, onCleanup } from 'solid-js';
-import type { Accessor } from 'solid-js'
+import { CoroutineScope, ScopeProxy } from 'kmp-playground-client';
+import { DependencyList, useEffect, useState } from 'react';
+import { Loading } from './Loader.tsx';
 
-export function useDisposable<T extends Disposable>(createDisposable: () => T): T {
-   const disposable = createDisposable()
+export function useRequest<T>(loadData: (scope: CoroutineScope) => Promise<T>, deps: DependencyList = []): Loading<T> {
+   const [data, setData] = useState<Loading<T>>({ isLoading: true })
 
-   onCleanup(() => {
-      disposable.dispose()
-   })
+   useEffect(() => {
+      async function fetchData(scope: CoroutineScope) {
+         try {
+            const data = await loadData(scope)
+            setData({ isLoading: false, data })
+         } catch (error: unknown) {
+            console.error(error)
+         }
+      }
 
-   return disposable
-}
+      const scopeProxy = new ScopeProxy()
 
-export function useCoroutineScope(): CoroutineScope {
-   return useDisposable(() => new ScopeProxy()).scope
-}
+      fetchData(scopeProxy.scope)
 
-export type Loading<T> = {
-   isLoading: true
-} | {
-   isLoading: false
-   value: T
-}
+      return () => {
+         // when hook finishes, scope will be terminated
+         // (by default (with empty dependencies) this will be called on component unmount
+         // even if the request is still pending, loadData should depend on the passed scope and terminate the request
+         scopeProxy.dispose()
+      }
+   }, deps);
 
-export function mapLoadingState<T, R>(
-   current: Loading<T>,
-   mapReady: (value: T) => R,
-   mapLoading: () => Loading<R> = () => ({ isLoading: true }),
-): Loading<R> {
-   if (current.isLoading) {
-      return mapLoading()
-   }
-
-   return { isLoading: false, value: mapReady(current.value) }
-}
-
-export function useLoading<T>(promise: Promise<T>): Accessor<Loading<T>> {
-   const [loadingState, setLoadingState] = createSignal<Loading<T>>({ isLoading: true })
-
-   // todo: handle errors
-   promise.then(value => {
-      setLoadingState({ isLoading: false, value })
-   })
-
-   return loadingState
+   return data;
 }

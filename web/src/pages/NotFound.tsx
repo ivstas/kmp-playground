@@ -1,5 +1,9 @@
+import { PageLayout } from './PageLayout.tsx';
+
 export function NotFound() {
    return (
-      <h1>No such page</h1>
+      <PageLayout>
+         <h1>No such page</h1>
+      </PageLayout>
    )
 }
