@@ -1,9 +1,6 @@
-package org.kmp.api
+package org.kmp
 
 import kotlinx.rpc.RPC
-import org.kmp.Issue
-import org.kmp.IssueIn
-import org.kmp.IssueListUpdates
 
 interface IssueApi: RPC {
     suspend fun addIssue(issueIn: IssueIn): Int
@@ -12,3 +9,6 @@ interface IssueApi: RPC {
     suspend fun getIssueEventFlow(): IssueListUpdates
 }
 
+interface UserApi: RPC {
+    suspend fun getUser(userId: Int): User?
+}

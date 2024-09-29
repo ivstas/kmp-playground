@@ -1,6 +1,6 @@
 import { Issue as ApiIssue, IssuesModificationEventListener, ScopeProxy } from 'kmp-playground-client';
 import {
-   IssueApi,
+   IssueApiWrapper,
    IssueChangedEventListener,
    IterableModificationEventListener,
    KtorRPCClient,
@@ -11,7 +11,7 @@ import { homePageBreadcrumb, PageLayout } from './PageLayout.tsx';
 
 
 export function Issues(props: { rpcClient: KtorRPCClient }) {
-   const api = new IssueApi(props.rpcClient)
+   const api = new IssueApiWrapper(props.rpcClient)
    const issues = useIssues(api)
 
    const navigateToHref = useNavigateToHref()
@@ -24,6 +24,7 @@ export function Issues(props: { rpcClient: KtorRPCClient }) {
                   <tr>
                      <th>Issue</th>
                      <th>Is completed</th>
+                     <th>assignee</th>
                   </tr>
                </thead>
                <tbody>
@@ -41,11 +42,14 @@ export function Issues(props: { rpcClient: KtorRPCClient }) {
                               </label>
                            </div>
                         </th>
+                        <th>
+                           <a href={pages.user(issue.assigneeId.toString())} onClick={navigateToHref} className="link">{issue.assigneeId}</a>
+                        </th>
                      </tr>
                   ))}
                </tbody>
             </table>
-               
+
          </div>
       </PageLayout>
    )
@@ -58,7 +62,7 @@ interface Issue {
    isCompleted: boolean
 }
 
-function useIssues(api: IssueApi): Issue[] {
+function useIssues(api: IssueApiWrapper): Issue[] {
    const [signal, setSignal] = useState<Issue[]>([])
 
    const listListener = new IterableModificationEventListener(

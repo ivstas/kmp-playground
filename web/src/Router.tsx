@@ -11,6 +11,9 @@ export type Page = {
     page: 'issues-single',
     issueId: number,
 } | {
+    page: 'users-single',
+    userId: number,
+} | {
     page: 'not-found',
 }
 
@@ -18,6 +21,7 @@ export const pages = {
    home: '/',
    issues: '/issues',
    issue: (issueId: string) => `/issues/${issueId}`,
+   user: (userId: string) => `/users/${userId}`,
 }
 
 const RouterContext = createContext<Navigo | undefined>(undefined);
@@ -33,20 +37,34 @@ export function Router({ children }: {children: (page: Page) => ReactNode}) {
          .on(pages.home, () => {
             setPage({ page: 'home' })
          })
+         .on(pages.user(':id'), (match) => {
+            const userIdAsString = match?.data?.id;
+            if (userIdAsString === undefined) {
+               throw new Error('userId not found in url')
+            }
+
+            const userId = Number.parseInt(userIdAsString)
+            if (Number.isNaN(userId)) {
+               throw new Error(`issue id ${userIdAsString} is not a number`)
+            }
+
+            setPage({ page: 'users-single', userId: userId })
+         })
          .on(pages.issues, () => {
             setPage({ page: 'issues-all' })
          })
          .on(pages.issue(':id'), (match) => {
             const issueIdAsString = match?.data?.id
             if (issueIdAsString === undefined) {
-               throw new Error('issueId not found')
-            } else {
-               const issueId = Number.parseInt(issueIdAsString)
-               if (Number.isNaN(issueId)) {
-                  throw new Error(`issue id ${issueIdAsString} is not a number`)
-               }
-               setPage({ page: 'issues-single', issueId })
+               throw new Error('issueId not found in url')
             }
+
+            const issueId = Number.parseInt(issueIdAsString)
+            if (Number.isNaN(issueId)) {
+               throw new Error(`issue id ${issueIdAsString} is not a number`)
+            }
+            setPage({ page: 'issues-single', issueId })
+            
          })
          .on('*', () => {
             setPage({  page: 'not-found' })

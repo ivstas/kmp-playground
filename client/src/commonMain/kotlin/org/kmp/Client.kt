@@ -5,29 +5,12 @@ import kotlinx.coroutines.*
 import kotlinx.rpc.streamScoped
 import kotlinx.rpc.transport.ktor.client.KtorRPCClient
 import kotlinx.rpc.withService
-import org.kmp.api.AwesomeApi
-import org.kmp.api.IssueApi
-import org.rsp.IterableModificationEventReset
 import kotlin.js.Promise
 
-@Suppress("unused")
-@JsExport
-class MessageApi(private val rpcClient: KtorRPCClient) {
-    fun listenToMessageFlow(scope: CoroutineScope, collector: (value: String) -> Unit) {
-        scope.launch {
-            streamScoped {
-                val flow = rpcClient.withService<AwesomeApi>().getNews("KotlinBurg")
-                flow.collect {
-                    collector(it.value)
-                }
-            }
-        }
-    }
-}
 
 @Suppress("unused")
 @JsExport
-class IssueApi(private val rpcClient: KtorRPCClient) {
+class IssueApiWrapper(private val rpcClient: KtorRPCClient) {
     @OptIn(DelicateCoroutinesApi::class)
     fun addIssue(issueIn: IssueIn, scope: CoroutineScope = GlobalScope): Promise<Int> {
         return scope.promise {
@@ -63,6 +46,17 @@ class IssueApi(private val rpcClient: KtorRPCClient) {
                 }
                 updates.listChangedFlow.collect(issuesModificationEventListener.onListChanged::collector)
             }
+        }
+    }
+}
+
+@Suppress("unused")
+@JsExport
+class UserApiWrapper(private val rpcClient: KtorRPCClient) {
+    @OptIn(DelicateCoroutinesApi::class)
+    fun getUser(userId: Int, scope: CoroutineScope = GlobalScope): Promise<User?> {
+        return scope.promise {
+            rpcClient.withService<UserApi>().getUser(userId)
         }
     }
 }

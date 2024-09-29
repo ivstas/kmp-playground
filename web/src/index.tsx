@@ -9,6 +9,7 @@ import { NotFound } from './pages/NotFound.tsx';
 import { IssuesSingle } from './pages/IssuesSingle.tsx';
 import { KtorRPCClient } from 'kmp-playground-client';
 import { HomePage } from './pages/HomePage.tsx';
+import { UsersSingle } from './pages/UsersSingle.tsx';
 
 
 const rootEl = document.getElementById('root');
@@ -36,6 +37,8 @@ const App = memo(function App({ rpcClient, page } : { rpcClient: KtorRPCClient, 
          return <Issues rpcClient={rpcClient}/>
       case 'issues-single':
          return <IssuesSingle rpcClient={rpcClient} issueId={page.issueId}/>
+      case 'users-single':
+         return <UsersSingle rpcClient={rpcClient} userId={page.userId}/>
       default:
          return <NotFound/>
    }

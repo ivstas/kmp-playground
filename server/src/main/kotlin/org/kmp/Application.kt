@@ -12,10 +12,7 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.batchInsert
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.kmp.manager.IssueManager
-import org.kmp.api.AwesomeApi
-import org.kmp.api.IssueApi
-import org.kmp.handlers.AwesomeApiHandler
-import org.kmp.handlers.IssueApiHandler
+import org.kmp.manager.UserManager
 
 
 fun main() {
@@ -26,6 +23,7 @@ fun main() {
     fillTestData(db)
 
     val issueService = IssueManager(db)
+    val userService = UserManager(db)
 
     embeddedServer(Netty, port = SERVER_PORT, host = "0.0.0.0") {
         install(RPC)
@@ -37,8 +35,8 @@ fun main() {
                     }
                 }
 
-                registerService<AwesomeApi> { ctx -> AwesomeApiHandler(ctx) }
                 registerService<IssueApi> { ctx -> IssueApiHandler(ctx, issueService) }
+                registerService<UserApi> { ctx -> UserApiHandler(ctx, userService) }
             }
         }
     }.start(wait = true)
