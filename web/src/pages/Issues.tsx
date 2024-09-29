@@ -7,17 +7,17 @@ import {
 } from 'kmp-playground-client';
 import { useNavigateToHref } from '../Router.tsx';
 import { useEffect, useState } from 'react';
-import { PageLayout } from './PageLayout.tsx';
+import { homePageBreadcrumb, PageLayout } from './PageLayout.tsx';
 
 
-export function Issues(props: { rpcClient: KtorRPCClient }): JSX.Element {
+export function Issues(props: { rpcClient: KtorRPCClient }) {
    const api = new IssueApi(props.rpcClient)
    const issues = useIssues(api)
 
    const navigateToHref = useNavigateToHref()
 
    return (
-      <PageLayout>
+      <PageLayout breadcrumbs={[homePageBreadcrumb, { text: 'All issues' }]}>
          <div>
             <h1>Issues</h1>
             <ul className="menu bg-base-200 rounded-box w-96">

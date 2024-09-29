@@ -12,6 +12,12 @@ export type Page = {
     page: 'not-found',
 }
 
+export const pages = {
+   home: '/',
+   issues: '/issues',
+   issue: (issueId: string) => `/issues/${issueId}`,
+}
+
 const RouterContext = createContext<Navigo | undefined>(undefined);
 
 export function Router({ children }: {children: (page: Page) => ReactNode}) {
@@ -22,10 +28,10 @@ export function Router({ children }: {children: (page: Page) => ReactNode}) {
       const router = new Navigo('/');
 
       router
-         .on('/issues', () => {
+         .on(pages.issues, () => {
             setPage({ page: 'issues-all' })
          })
-         .on('/issues/:id', (match) => {
+         .on(pages.issue(':id'), (match) => {
             const issueIdAsString = match?.data?.id
             if (issueIdAsString === undefined) {
                throw new Error('issueId not found')

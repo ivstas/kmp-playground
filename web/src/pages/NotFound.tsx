@@ -1,8 +1,8 @@
-import { PageLayout } from './PageLayout.tsx';
+import { homePageBreadcrumb, PageLayout } from './PageLayout.tsx';
 
 export function NotFound() {
    return (
-      <PageLayout>
+      <PageLayout breadcrumbs={[homePageBreadcrumb]}>
          <h1>No such page</h1>
       </PageLayout>
    )
