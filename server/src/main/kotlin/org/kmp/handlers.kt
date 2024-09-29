@@ -26,6 +26,10 @@ class IssueApiHandler(
         return issueManager.listenToIssues(GlobalScope)
     }
 
+    override suspend fun setTitle(issueId: Int, title: String) {
+        issueManager.setTitle(issueId, title)
+    }
+
     override suspend fun setIsCompleted(issueId: Int, isCompleted: Boolean) {
         issueManager.setIsCompleted(issueId, isCompleted)
     }

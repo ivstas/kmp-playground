@@ -81,4 +81,10 @@ class IssueManager(private val db: Database) {
             it[IssuesTable.isCompleted] = isCompleted
         }
     }
+
+    fun setTitle(issueId: Int, title: String) = transaction(db) {
+        IssuesTable.update(where = { IssuesTable.id eq issueId }) {
+            it[IssuesTable.title] = title
+        }
+    }
 }

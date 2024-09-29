@@ -49,6 +49,12 @@ class IssueApiWrapper(private val rpcClient: KtorRPCClient) {
         }
     }
 
+    fun setTitle(issueId: Int, title: String, scope: CoroutineScope = GlobalScope): Promise<Unit> {
+        return scope.promise {
+            rpcClient.withService<IssueApi>().setTitle(issueId, title)
+        }
+    }
+
     fun setIsCompleted(issueId: Int, isCompleted: Boolean, scope: CoroutineScope = GlobalScope): Promise<Unit> {
         return scope.promise {
             rpcClient.withService<IssueApi>().setIsCompleted(issueId, isCompleted)
