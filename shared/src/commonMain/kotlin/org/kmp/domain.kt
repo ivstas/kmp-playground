@@ -9,6 +9,13 @@ import kotlin.js.JsExport
 
 @JsExport
 @Serializable
+data class User(
+    val id: Int,
+    val name: String,
+)
+
+@JsExport
+@Serializable
 data class IssueIn(
     val title: String,
     val assigneeId: Int? = null,
@@ -20,12 +27,20 @@ data class IssueIn(
 data class Issue(
     val id: Int,
     val title: String,
-    val assigneeId: Int?,
-    val isCompleted: Boolean,
+    val assigneeId: Int? = null,
+    val isCompleted: Boolean = false,
 )
 
+@JsExport
 @Serializable
 data class TagIn(
+    val title: String,
+)
+
+@JsExport
+@Serializable
+data class Tag(
+    val id: Int,
     val title: String,
 )
 

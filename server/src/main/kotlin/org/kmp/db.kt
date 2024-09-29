@@ -17,7 +17,7 @@ object IssuesTable : IntIdTable() {
 
 object TagsTable : IntIdTable() {
     val title = varchar("title", MAX_VARCHAR_LENGTH)
-    val creatorIdTable = integer("creator_id").references(UsersTable.id)
+//    val creatorIdTable = integer("creator_id").references(UsersTable.id)
 }
 
 object IssuesTagsTable : CompositeIdTable() {
