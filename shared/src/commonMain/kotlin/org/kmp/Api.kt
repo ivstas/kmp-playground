@@ -7,6 +7,7 @@ interface IssueApi: RPC {
     suspend fun getIssues(): List<Issue>
     suspend fun getIssue(issueId: Int): Issue?
     suspend fun getIssueEventFlow(): IssueListUpdates
+    suspend fun setIsCompleted(issueId: Int, isCompleted: Boolean)
 }
 
 interface UserApi: RPC {

@@ -38,6 +38,7 @@ export function Issues(props: { rpcClient: KtorRPCClient }) {
                               <label className="label cursor-pointer">
                                  <input type="checkbox" className="toggle" checked={issue.isCompleted} onChange={e => {
                                     const isChecked = e.target.checked;
+                                    api.setIsCompleted(issue.id, isChecked)
                                  }}/>
                               </label>
                            </div>

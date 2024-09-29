@@ -48,6 +48,12 @@ class IssueApiWrapper(private val rpcClient: KtorRPCClient) {
             }
         }
     }
+
+    fun setIsCompleted(issueId: Int, isCompleted: Boolean, scope: CoroutineScope = GlobalScope): Promise<Unit> {
+        return scope.promise {
+            rpcClient.withService<IssueApi>().setIsCompleted(issueId, isCompleted)
+        }
+    }
 }
 
 @Suppress("unused")

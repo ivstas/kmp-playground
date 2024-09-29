@@ -8,6 +8,7 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 import org.kmp.*
 import org.kmp.IssuesTable
 import org.rsp.*
@@ -73,5 +74,11 @@ class IssueManager(private val db: Database) {
                 isCompleted = it[IssuesTable.isCompleted]
             )
         }.firstOrNull()
+    }
+
+    fun setIsCompleted(issueId: Int, isCompleted: Boolean) = transaction(db) {
+        IssuesTable.update(where = { IssuesTable.id eq issueId }) {
+            it[IssuesTable.isCompleted] = isCompleted
+        }
     }
 }

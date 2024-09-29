@@ -25,6 +25,10 @@ class IssueApiHandler(
         // todo: generate subscription id, return it alongside with the flow
         return issueManager.listenToIssues(GlobalScope)
     }
+
+    override suspend fun setIsCompleted(issueId: Int, isCompleted: Boolean) {
+        issueManager.setIsCompleted(issueId, isCompleted)
+    }
 }
 
 class UserApiHandler(
