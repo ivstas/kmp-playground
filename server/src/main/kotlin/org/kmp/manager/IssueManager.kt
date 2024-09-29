@@ -53,10 +53,10 @@ class IssueManager(private val db: Database) {
 
         // fixme: create a scope from lifetime
         scope.launch {
-            delay(1_000)
+            delay(500)
             listChangedFlow.emit(IterableModificationEventReset(issues))
 
-            delay(1_000)
+            delay(500)
             listChangedFlow.emit(IterableModificationEventRemoved(3))
         }
 

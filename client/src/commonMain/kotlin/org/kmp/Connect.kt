@@ -28,7 +28,7 @@ private suspend fun connectToServer(): KtorRPCClient {
         }
     }
 
-    delay(500) // simulate network delay to connection state to be visible
+    delay(250) // simulate network delay to connection state to be visible
 
     return httpClient.rpc {
         url {
