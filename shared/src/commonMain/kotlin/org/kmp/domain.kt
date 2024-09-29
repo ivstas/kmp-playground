@@ -11,7 +11,8 @@ import kotlin.js.JsExport
 @Serializable
 data class IssueIn(
     val title: String,
-    val assigneeId: Long? = null,
+    val assigneeId: Int? = null,
+    val isCompleted: Boolean = false,
 )
 
 @JsExport
