@@ -8,6 +8,7 @@ import { Page, Router } from './Router.tsx';
 import { NotFound } from './pages/NotFound.tsx';
 import { IssuesSingle } from './pages/IssuesSingle.tsx';
 import { KtorRPCClient } from 'kmp-playground-client';
+import { HomePage } from './pages/HomePage.tsx';
 
 
 const rootEl = document.getElementById('root');
@@ -29,12 +30,14 @@ root.render(
 
 const App = memo(function App({ rpcClient, page } : { rpcClient: KtorRPCClient, page: Page }) {
    switch (page.page) {
-   case 'issues-all':
-      return <Issues rpcClient={rpcClient}/>
-   case 'issues-single':
-      return <IssuesSingle rpcClient={rpcClient} issueId={page.issueId}/>
-   default:
-      return <NotFound/>
+      case 'home':
+         return <HomePage/>
+      case 'issues-all':
+         return <Issues rpcClient={rpcClient}/>
+      case 'issues-single':
+         return <IssuesSingle rpcClient={rpcClient} issueId={page.issueId}/>
+      default:
+         return <NotFound/>
    }
 })
 

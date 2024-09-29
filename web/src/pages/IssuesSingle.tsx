@@ -3,7 +3,7 @@ import { useRequest } from '../hooks.ts';
 import { IssueApi } from 'kmp-playground-client';
 import type { KtorRPCClient } from 'kmp-playground-client';
 import { homePageBreadcrumb, PageLayout } from './PageLayout.tsx';
-import { pages } from "../Router.tsx";
+import { pages } from '../Router.tsx';
 
 export function IssuesSingle(props: { rpcClient: KtorRPCClient, issueId: number }) {
    const api = new IssueApi(props.rpcClient)

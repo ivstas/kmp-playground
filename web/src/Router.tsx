@@ -4,6 +4,8 @@ import { BaseSyntheticEvent, createContext, ReactNode, useContext, useEffect, us
 
 
 export type Page = {
+    page: 'home',
+} | {
     page: 'issues-all',
 } | {
     page: 'issues-single',
@@ -28,6 +30,9 @@ export function Router({ children }: {children: (page: Page) => ReactNode}) {
       const router = new Navigo('/');
 
       router
+         .on(pages.home, () => {
+            setPage({ page: 'home' })
+         })
          .on(pages.issues, () => {
             setPage({ page: 'issues-all' })
          })

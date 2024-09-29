@@ -19,7 +19,9 @@ export default typescriptEslint.config({
       'react': react,
    },
    rules: {
-      'indent': ['warn', 3],
+      'indent': ['warn', 3, {
+         'SwitchCase': 1,
+      }],
       'object-curly-spacing': ['warn', 'always'],
       '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/switch-exhaustiveness-check': 'error',
