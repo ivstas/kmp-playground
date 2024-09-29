@@ -4,7 +4,7 @@ import stylistic from '@stylistic/eslint-plugin'
 import react from 'eslint-plugin-react'
 
 export default typescriptEslint.config({
-   files: ['src/**/*.{js,mjs,cjs,ts}'],
+   files: ['src/**/*.{js,mjs,cjs,ts,tsx}'],
    extends: [
       pluginJs.configs.recommended,
       ...typescriptEslint.configs.recommended,
