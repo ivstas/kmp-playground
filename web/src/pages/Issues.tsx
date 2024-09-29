@@ -5,7 +5,7 @@ import {
    IterableModificationEventListener,
    KtorRPCClient,
 } from 'kmp-playground-client';
-import { useNavigateToHref } from '../Router.tsx';
+import { pages, useNavigateToHref } from '../Router.tsx';
 import { useEffect, useState } from 'react';
 import { homePageBreadcrumb, PageLayout } from './PageLayout.tsx';
 
@@ -18,15 +18,34 @@ export function Issues(props: { rpcClient: KtorRPCClient }) {
 
    return (
       <PageLayout breadcrumbs={[homePageBreadcrumb, { text: 'All issues' }]}>
-         <div>
-            <h1>Issues</h1>
-            <ul className="menu bg-base-200 rounded-box w-96">
-               {issues.map((issue) => (
-                  <li key={issue.id}>
-                     <a href={`/issues/${issue.id}`} onClick={navigateToHref}>{issue.title}</a>
-                  </li>
-               ))}
-            </ul>
+         <div className="mx-2 my-3">
+            <table className="table">
+               <thead>
+                  <tr>
+                     <th>Issue</th>
+                     <th>Is completed</th>
+                  </tr>
+               </thead>
+               <tbody>
+                  {issues.map((issue) => (
+                     <tr key={issue.id}>
+                        <th>
+                           <a href={pages.issue(issue.id.toString())} onClick={navigateToHref} className="link">{issue.title}</a>
+                        </th>
+                        <th>
+                           <div className="form-control">
+                              <label className="label cursor-pointer">
+                                 <input type="checkbox" className="toggle" checked={issue.isCompleted} onChange={e => {
+                                    const isChecked = e.target.checked;
+                                 }}/>
+                              </label>
+                           </div>
+                        </th>
+                     </tr>
+                  ))}
+               </tbody>
+            </table>
+               
          </div>
       </PageLayout>
    )

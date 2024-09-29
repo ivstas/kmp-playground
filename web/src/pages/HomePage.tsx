@@ -5,8 +5,9 @@ export function HomePage() {
    const navigateToHref = useNavigateToHref()
    return (
       <PageLayout breadcrumbs={[homePageBreadcrumb]}>
-         <h1>Welcome</h1>
-         <a href={pages.issues} onClick={navigateToHref}>Issues</a>
+         <div className="mx-6 my-3">
+            <a href={pages.issues} onClick={navigateToHref} className="link">All Issues</a>
+         </div>
       </PageLayout>
    )
 }

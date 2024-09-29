@@ -26,7 +26,7 @@ export function PageLayout({ children, breadcrumbs }: PropsWithChildren<{ breadc
             </ul>
          </nav>
 
-         <main className="flex flex-col px-6 py-3">
+         <main>
             {children}
          </main>
       </section>

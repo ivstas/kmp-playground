@@ -11,8 +11,7 @@ export function IssuesSingle(props: { rpcClient: KtorRPCClient, issueId: number 
 
    return (
       <PageLayout breadcrumbs={[homePageBreadcrumb, { text: 'All issues', href: pages.issues }, { text: 'Issue' }]}>
-         <div>
-            <h1>Issue</h1>
+         <div className="mx-6 my-3">
             {withLoader(issueResource, (issue) => issue
                ? <h2>{issue.title}</h2>
                : <div>Issue {props.issueId} not found</div>,
