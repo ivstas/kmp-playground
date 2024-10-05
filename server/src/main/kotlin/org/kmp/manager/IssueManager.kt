@@ -1,9 +1,7 @@
 package org.kmp.manager
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.selectAll
@@ -32,7 +30,31 @@ class IssueManager(private val db: Database) {
         }
     }
 
-    private val allIssueSubscriptions = mutableSetOf<Flow<IssuesModificationEvent>>()
+    private val singleIssueSubscriptions = mutableSetOf<SingleItemSubscription<Issue>>()
+
+    fun subscribeToIssue(scope: CoroutineScope, issueId: Int): InitializedFlow<Issue, IssueChangedEvent>? {
+        val issue = getIssue(issueId)
+            ?: return null
+
+        val flow = MutableSharedFlow<IssueChangedEvent>()
+
+        val subscription = object : SingleItemSubscription<Issue> {
+            override fun check(item: Issue) = item.id == issueId
+            override fun push(event: IssueChangedEvent) {
+                scope.launch {
+                    flow.emit(event)
+                }
+            }
+        }
+
+        singleIssueSubscriptions.add(subscription)
+        // todo: unsubscribe when scope end
+//        scope.coroutineContext.job.invokeOnCompletion {
+//            singleIssueSubscriptions.remove(subscription)
+//        }
+
+        return InitializedFlow(issue, flow)
+    }
 
     fun listenToIssues(scope: CoroutineScope): IssueListUpdates {
         val issues = getIssues()
@@ -43,8 +65,6 @@ class IssueManager(private val db: Database) {
             listChangedFlow = listChangedFlow,
             elementChangedFlow = MutableSharedFlow()
         )
-
-
 //        allIssueSubscriptions.add(subscription)
 
 //        scope.toLifetime().callWhenTerminated {
@@ -64,21 +84,34 @@ class IssueManager(private val db: Database) {
     }
 
     fun getIssue(issueId: Int) = transaction(db) {
-        IssuesTable.selectAll().where {
-            IssuesTable.id eq issueId
-        }.map {
-            Issue(
-                id = it[IssuesTable.id].value,
-                title = it[IssuesTable.title],
-                assigneeId = it[IssuesTable.assigneeId],
-                isCompleted = it[IssuesTable.isCompleted]
-            )
-        }.firstOrNull()
+        getIssueInTransaction(issueId)
     }
 
-    fun setIsCompleted(issueId: Int, isCompleted: Boolean) = transaction(db) {
-        IssuesTable.update(where = { IssuesTable.id eq issueId }) {
-            it[IssuesTable.isCompleted] = isCompleted
+    private fun getIssueInTransaction(issueId: Int) = IssuesTable.selectAll().where {
+        IssuesTable.id eq issueId
+    }.map {
+        Issue(
+            id = it[IssuesTable.id].value,
+            title = it[IssuesTable.title],
+            assigneeId = it[IssuesTable.assigneeId],
+            isCompleted = it[IssuesTable.isCompleted]
+        )
+    }.firstOrNull()
+
+    fun setIsCompleted(issueId: Int, isCompleted: Boolean) {
+        val issue = transaction(db) {
+            // todo: update + select
+            IssuesTable.update(where = { IssuesTable.id eq issueId }) {
+                it[IssuesTable.isCompleted] = isCompleted
+            }
+
+            getIssueInTransaction(issueId) ?: error("Issue not found")
+        }
+
+        singleIssueSubscriptions.forEach { subscription ->
+            if (subscription.check(issue)) {
+                subscription.push(IsCompletedChanged(isCompleted))
+            }
         }
     }
 
@@ -87,4 +120,9 @@ class IssueManager(private val db: Database) {
             it[IssuesTable.title] = title
         }
     }
+}
+
+interface SingleItemSubscription<T> {
+    fun check(item: T): Boolean
+    fun push(event: IssueChangedEvent)
 }

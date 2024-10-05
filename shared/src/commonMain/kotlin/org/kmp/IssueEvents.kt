@@ -1,6 +1,5 @@
 package org.kmp
 
-import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.Serializable
 import org.rsp.*
 import kotlin.js.JsExport
@@ -10,12 +9,13 @@ import kotlin.js.JsExport
 @Serializable sealed interface IssueChangedEvent
 @Serializable data class TitleChanged(val title: String): IssueChangedEvent
 @Serializable data class IsCompletedChanged(val isCompleted: Boolean): IssueChangedEvent
-@Serializable data class AssigneeIdChanged(val assigneeId: Long): IssueChangedEvent
+@Serializable data class AssigneeIdChanged(val assigneeId: Int): IssueChangedEvent
 
+// todo: replace with event collector in client
 @JsExport class IssueChangedEventListener(
     private val onTitleChanged: (title: String) -> Unit,
     private val onIsCompletedChanged: (isCompleted: Boolean) -> Unit,
-    private val onAssigneeIdChanged: (assigneeId: Long) -> Unit,
+    private val onAssigneeIdChanged: (assigneeId: Int) -> Unit,
 ) {
     @Suppress("NON_EXPORTABLE_TYPE")
     fun collector(event: IssueChangedEvent) {

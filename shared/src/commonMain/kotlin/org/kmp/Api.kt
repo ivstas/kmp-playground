@@ -9,6 +9,8 @@ interface IssueApi: RPC {
     suspend fun getIssueEventFlow(): IssueListUpdates
     suspend fun setIsCompleted(issueId: Int, isCompleted: Boolean)
     suspend fun setTitle(issueId: Int, title: String)
+
+    suspend fun subscribeToIssue(issueId: Int): InitializedFlow<Issue, IssueChangedEvent>?
 }
 
 interface UserApi: RPC {

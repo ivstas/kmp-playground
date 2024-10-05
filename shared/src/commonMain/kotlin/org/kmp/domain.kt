@@ -1,7 +1,6 @@
 package org.kmp
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 import org.rsp.IterableModificationEvent
@@ -53,4 +52,15 @@ data class Wrapper<T>(
 data class IssueListUpdates(
     @Contextual val listChangedFlow: Flow<IterableModificationEvent<Int, Issue>>,
     @Contextual val elementChangedFlow: Flow<Pair<Int, IssueChangedEvent>>,
+)
+
+@Serializable
+data class UserUpdates(
+    @Contextual val userChangedFlow: Flow<UserEvent>,
+)
+
+@Serializable
+data class InitializedFlow<T, E>(
+    val initialValue: T,
+    @Contextual val flow: Flow<E>,
 )

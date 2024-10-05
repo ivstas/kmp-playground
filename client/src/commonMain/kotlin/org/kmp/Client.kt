@@ -1,7 +1,9 @@
 @file:Suppress("NON_EXPORTABLE_TYPE")
 
 package org.kmp
+
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
 import kotlinx.rpc.streamScoped
 import kotlinx.rpc.transport.ktor.client.KtorRPCClient
 import kotlinx.rpc.withService
@@ -49,6 +51,28 @@ class IssueApiWrapper(private val rpcClient: KtorRPCClient) {
         }
     }
 
+    fun subscribeToIssue(
+        scope: CoroutineScope,
+        issueId: Int,
+    ): Promise<InitializedCollector> {
+        return Promise { resolve, reject ->
+            scope.promise {
+                streamScoped {
+                    val initializedFlow = rpcClient.withService<IssueApi>().subscribeToIssue(issueId)
+                        ?: throw Exception("Issue not found")
+
+                    val initializedCollector = InitializedCollector(initializedFlow.initialValue, initializedFlow.flow, this)
+                    launch {
+                        resolve(initializedCollector)
+                    }
+
+                    awaitCancellation() // keeps the subscription alive
+                }
+            }.catch { reject(it) }
+
+        }
+    }
+
     fun setTitle(issueId: Int, title: String, scope: CoroutineScope = GlobalScope): Promise<Unit> {
         return scope.promise {
             rpcClient.withService<IssueApi>().setTitle(issueId, title)
@@ -74,8 +98,9 @@ class UserApiWrapper(private val rpcClient: KtorRPCClient) {
 }
 
 @JsExport
-class ScopeProxy: Disposable {
+class ScopeProxy : Disposable {
     private val job = Job()
+
     @Suppress("unused")
     val scope = CoroutineScope(Dispatchers.Default + job)
 
@@ -85,4 +110,25 @@ class ScopeProxy: Disposable {
 @JsExport
 interface Disposable {
     fun dispose()
+}
+
+@JsExport
+class InitializedCollector(
+    val initialValue: Issue,
+    private val flow: Flow<IssueChangedEvent>,
+    private val scope: CoroutineScope,
+) {
+    fun listenToUpdates(setIssue: (mapper: (Issue) -> Issue) -> Unit) {
+        scope.launch {
+            flow.collect { event ->
+                setIssue { current ->
+                    when (event) {
+                        is TitleChanged -> current.copy(title = event.title)
+                        is IsCompletedChanged -> current.copy(isCompleted = event.isCompleted)
+                        is AssigneeIdChanged -> current.copy(assigneeId = event.assigneeId)
+                    }
+                }
+            }
+        }
+    }
 }

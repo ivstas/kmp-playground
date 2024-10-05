@@ -11,7 +11,7 @@ export function useRequest<T>(loadData: (scope: CoroutineScope) => Promise<T>, d
             const data = await loadData(scope)
             setData({ isLoading: false, data })
          } catch (error: unknown) {
-            console.error(error)
+            console.error(error) // todo: this shouldn't handle errors
          }
       }
 
@@ -28,4 +28,16 @@ export function useRequest<T>(loadData: (scope: CoroutineScope) => Promise<T>, d
    }, deps);
 
    return data;
+}
+
+export function useScopeEffect(effect: (scope: CoroutineScope) => void, deps: DependencyList = []) {
+   useEffect(() => {
+      const scopeProxy = new ScopeProxy()
+
+      effect(scopeProxy.scope)
+
+      return () => {
+         scopeProxy.dispose()
+      }
+   }, deps);
 }

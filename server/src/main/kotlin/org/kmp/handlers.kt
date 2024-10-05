@@ -1,6 +1,6 @@
 package org.kmp
 
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.*
 import org.kmp.manager.IssueManager
 import org.kmp.manager.UserManager
 import kotlin.coroutines.CoroutineContext
@@ -32,6 +32,10 @@ class IssueApiHandler(
 
     override suspend fun setIsCompleted(issueId: Int, isCompleted: Boolean) {
         issueManager.setIsCompleted(issueId, isCompleted)
+    }
+
+    override suspend fun subscribeToIssue(issueId: Int): InitializedFlow<Issue, IssueChangedEvent>? {
+        return issueManager.subscribeToIssue(this, issueId)
     }
 }
 

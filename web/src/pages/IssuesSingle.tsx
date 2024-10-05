@@ -1,20 +1,21 @@
 import { withLoader } from '../Loader.tsx';
-import { useRequest } from '../hooks.ts';
-import type { KtorRPCClient } from 'kmp-playground-client';
-import { Issue, IssueApiWrapper } from 'kmp-playground-client';
+import { useRequest, useScopeEffect } from '../hooks.ts';
+import { InitializedCollector, KtorRPCClient } from 'kmp-playground-client';
+import { IssueApiWrapper, ScopeProxy } from 'kmp-playground-client';
 import { homePageBreadcrumb, PageLayout } from './PageLayout.tsx';
 import { pages } from '../Router.tsx';
 import { useState } from 'react';
 
 export function IssuesSingle(props: { rpcClient: KtorRPCClient, issueId: number }) {
-   const api = new IssueApiWrapper(props.rpcClient)
-   const issueResource = useRequest(scope => api.getIssue(props.issueId, scope))
+   const [api] = useState(() => new IssueApiWrapper(props.rpcClient))
+
+   const loadingIssue = useRequest(scope => api.subscribeToIssue(scope, props.issueId))
 
    return (
       <PageLayout breadcrumbs={[homePageBreadcrumb, { text: 'All issues', href: pages.issues }, { text: 'Issue' }]}>
          <div className="mx-6 my-3">
-            {withLoader(issueResource, (issue) => issue
-               ? <IssueRenderer issue={issue} api={api}/>
+            {withLoader(loadingIssue, (loadingIssue) => loadingIssue
+               ? <IssueRenderer collector={loadingIssue} api={api} />
                : <div>Issue {props.issueId} not found</div>,
             )}
          </div>
@@ -22,7 +23,11 @@ export function IssuesSingle(props: { rpcClient: KtorRPCClient, issueId: number 
    )
 }
 
-function IssueRenderer({ issue, api }: { issue: Issue, api: IssueApiWrapper }) {
+function IssueRenderer({ collector, api }: { collector: InitializedCollector, api: IssueApiWrapper }) {
+   const [issue, setIssue] = useState(() => collector.initialValue)
+   useScopeEffect(scope => {
+      collector.listenToUpdates(setIssue)
+   }, [])
    const [title, setTitle] = useState(issue.title)
 
    const hasTitleChanged = title !== issue.title;
