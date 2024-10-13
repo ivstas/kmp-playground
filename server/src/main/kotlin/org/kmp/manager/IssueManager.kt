@@ -111,10 +111,16 @@ class IssueManager(private val db: Database) {
         broadcastIssueModificationEvent(issue, IsCompletedChanged(isCompleted))
     }
 
-    fun setTitle(issueId: Int, title: String) = transaction(db) {
-        IssuesTable.update(where = { IssuesTable.id eq issueId }) {
-            it[IssuesTable.title] = title
+    fun setTitle(issueId: Int, title: String) {
+        val issue = transaction(db) {
+            IssuesTable.update(where = { IssuesTable.id eq issueId }) {
+                it[IssuesTable.title] = title
+            }
+
+            getIssueInTransaction(issueId) ?: error("Issue not found")
         }
+
+        broadcastIssueModificationEvent(issue, TitleChanged(title))
     }
 }
 
