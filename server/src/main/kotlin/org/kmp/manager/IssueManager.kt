@@ -30,7 +30,14 @@ class IssueManager(private val db: Database) {
         }
     }
 
-    private val singleIssueSubscriptions = mutableSetOf<SingleItemSubscription<Issue>>()
+    private val issueChangeSubscriptions = mutableSetOf<IssueChangedCheckedSubscription>()
+    private fun broadcastIssueModificationEvent(entity: Issue, event: IssueChangedEvent) {
+        issueChangeSubscriptions.forEach { subscription ->
+            if (subscription.check(entity)) {
+                subscription.emit(event)
+            }
+        }
+    }
 
     fun subscribeToIssue(scope: CoroutineScope, issueId: Int): InitializedFlow<Issue, IssueChangedEvent>? {
         val issue = getIssue(issueId)
@@ -38,19 +45,12 @@ class IssueManager(private val db: Database) {
 
         val flow = MutableSharedFlow<IssueChangedEvent>()
 
-        val subscription = object : SingleItemSubscription<Issue> {
-            override fun check(item: Issue) = item.id == issueId
-            override fun push(event: IssueChangedEvent) {
-                scope.launch {
-                    flow.emit(event)
-                }
-            }
-        }
+        val subscription: IssueChangedCheckedSubscription = FlowSubscription(scope, flow) { it.id == issueId }
 
-        singleIssueSubscriptions.add(subscription)
+        issueChangeSubscriptions.add(subscription)
         // todo: unsubscribe when scope end
 //        scope.coroutineContext.job.invokeOnCompletion {
-//            singleIssueSubscriptions.remove(subscription)
+//            singleIssueSubscriptions.remove(subscription) 
 //        }
 
         return InitializedFlow(issue, flow)
@@ -108,11 +108,7 @@ class IssueManager(private val db: Database) {
             getIssueInTransaction(issueId) ?: error("Issue not found")
         }
 
-        singleIssueSubscriptions.forEach { subscription ->
-            if (subscription.check(issue)) {
-                subscription.push(IsCompletedChanged(isCompleted))
-            }
-        }
+        broadcastIssueModificationEvent(issue, IsCompletedChanged(isCompleted))
     }
 
     fun setTitle(issueId: Int, title: String) = transaction(db) {
@@ -122,7 +118,23 @@ class IssueManager(private val db: Database) {
     }
 }
 
-interface SingleItemSubscription<T> {
+typealias IssueChangedCheckedSubscription = CheckedSubscription<Issue, IssueChangedEvent>
+
+interface CheckedSubscription<T, E> {
     fun check(item: T): Boolean
-    fun push(event: IssueChangedEvent)
+    fun emit(event: E)
+}
+
+class FlowSubscription<T, E>(
+    private val scope: CoroutineScope,
+    private val flow: FlowCollector<E>,
+    private val checkItem: (T) -> Boolean,
+): CheckedSubscription<T, E> {
+    override fun check(item: T) = checkItem(item)
+
+    override fun emit(event: E) {
+        scope.launch {
+            flow.emit(event)
+        }
+    }
 }

@@ -56,10 +56,15 @@ class IssueApiWrapper(private val rpcClient: KtorRPCClient) {
         issueId: Int,
     ): Promise<InitializedCollector> {
         return Promise { resolve, reject ->
-            scope.promise {
+            scope.launch {
                 streamScoped {
-                    val initializedFlow = rpcClient.withService<IssueApi>().subscribeToIssue(issueId)
-                        ?: throw Exception("Issue not found")
+                    val initializedFlow = try {
+                        rpcClient.withService<IssueApi>().subscribeToIssue(issueId)
+                            ?: throw Exception("Issue not found")
+                    } catch (e: Throwable) {
+                        reject(e)
+                        return@streamScoped // ends the subscription
+                    }
 
                     val initializedCollector = InitializedCollector(initializedFlow.initialValue, initializedFlow.flow, this)
                     launch {
@@ -68,8 +73,7 @@ class IssueApiWrapper(private val rpcClient: KtorRPCClient) {
 
                     awaitCancellation() // keeps the subscription alive
                 }
-            }.catch { reject(it) }
-
+            }
         }
     }
 
