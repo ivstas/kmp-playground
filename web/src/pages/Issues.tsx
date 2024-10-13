@@ -44,7 +44,12 @@ export function Issues(props: { rpcClient: KtorRPCClient }) {
                            </div>
                         </th>
                         <th>
-                           <a href={pages.user(issue.assigneeId.toString())} onClick={navigateToHref} className="link">{issue.assigneeId}</a>
+                           {issue.assigneeId
+                              ? (
+                                 <a href={pages.user(issue.assigneeId.toString())} onClick={navigateToHref} className="link">{issue.assigneeId}</a>
+                              ) : (
+                                 <a>-</a>
+                              )}
                         </th>
                      </tr>
                   ))}
@@ -59,7 +64,7 @@ export function Issues(props: { rpcClient: KtorRPCClient }) {
 interface Issue {
    id: number
    title: string
-   assigneeId: number
+   assigneeId: number | null | undefined
    isCompleted: boolean
 }
 

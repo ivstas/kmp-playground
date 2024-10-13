@@ -122,6 +122,18 @@ class IssueManager(private val db: Database) {
 
         broadcastIssueModificationEvent(issue, TitleChanged(title))
     }
+
+    fun setAssigneeId(issueId: Int, assigneeId: Int?) {
+        val issue = transaction(db) {
+            IssuesTable.update(where = { IssuesTable.id eq issueId }) {
+                it[IssuesTable.assigneeId] = assigneeId
+            }
+
+            getIssueInTransaction(issueId) ?: error("Issue not found")
+        }
+
+        broadcastIssueModificationEvent(issue, AssigneeIdChanged(assigneeId))
+    }
 }
 
 typealias IssueChangedCheckedSubscription = CheckedSubscription<Issue, IssueChangedEvent>
