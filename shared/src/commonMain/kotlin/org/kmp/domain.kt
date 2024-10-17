@@ -44,17 +44,6 @@ data class Tag(
 )
 
 @Serializable
-data class Wrapper<T>(
-    val value: T,
-)
-
-@Serializable
-data class IssueListUpdates(
-    @Contextual val listChangedFlow: Flow<IterableModificationEvent<Int, Issue>>,
-    @Contextual val elementChangedFlow: Flow<Pair<Int, IssueChangedEvent>>,
-)
-
-@Serializable
 data class UserUpdates(
     @Contextual val userChangedFlow: Flow<UserEvent>,
 )
@@ -63,4 +52,11 @@ data class UserUpdates(
 data class InitializedFlow<T, E>(
     val initialValue: T,
     @Contextual val flow: Flow<E>,
+)
+
+@Serializable
+data class InitializedIssueListUpdates(
+    val initialValue: List<Issue>,
+    @Contextual val listChangedFlow: Flow<IterableModificationEvent<Int, Issue>>,
+    @Contextual val elementChangedFlow: Flow<Pair<Int, IssueChangedEvent>>,
 )

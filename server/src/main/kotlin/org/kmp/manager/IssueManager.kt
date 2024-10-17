@@ -13,11 +13,26 @@ import org.rsp.*
 
 
 class IssueManager(private val db: Database) {
-    fun addIssue(issueIn: IssueIn) = transaction(db) {
-        IssuesTable.insert {
-            it[title] = issueIn.title
-        } get IssuesTable.id
-    }.value
+    fun addIssue(issueIn: IssueIn): Int {
+        val entity = transaction(db) {
+            IssuesTable.insert {
+                it[title] = issueIn.title
+            }
+        }
+
+        val issue = entity.let {
+            Issue(
+                id = it[IssuesTable.id].value,
+                title = it[IssuesTable.title],
+                assigneeId = it[IssuesTable.assigneeId],
+                isCompleted = it[IssuesTable.isCompleted]
+            )
+        }
+
+        issueAdditionRemovalSubscription.forEach { it(true, issue) }
+
+        return issue.id
+    }
 
     fun getIssues() = transaction(db) {
         IssuesTable.selectAll().map {
@@ -30,12 +45,13 @@ class IssueManager(private val db: Database) {
         }
     }
 
+    private val issueAdditionRemovalSubscription = mutableSetOf<AddedRemovedSubscription<Issue>>()
+
+    // subscriptions to track field change events
     private val issueChangeSubscriptions = mutableSetOf<IssueChangedCheckedSubscription>()
     private fun broadcastIssueModificationEvent(entity: Issue, event: IssueChangedEvent) {
         issueChangeSubscriptions.forEach { subscription ->
-            if (subscription.check(entity)) {
-                subscription.emit(event)
-            }
+            subscription.emit(entity, event)
         }
     }
 
@@ -56,31 +72,99 @@ class IssueManager(private val db: Database) {
         return InitializedFlow(issue, flow)
     }
 
-    fun listenToIssues(scope: CoroutineScope): IssueListUpdates {
+    fun subscribeToAllIssues(scope: CoroutineScope): InitializedIssueListUpdates {
         val issues = getIssues()
 
         val listChangedFlow = MutableSharedFlow<IterableModificationEvent<Int, Issue>>()
 
-        val subscription = IssueListUpdates(
-            listChangedFlow = listChangedFlow,
-            elementChangedFlow = MutableSharedFlow()
-        )
-//        allIssueSubscriptions.add(subscription)
+        issueAdditionRemovalSubscription.add { isAdded: Boolean, issue: Issue ->
+            val event = if (isAdded) {
+                IterableModificationEventAdded<Issue>(issue)
+            } else {
+                IterableModificationEventRemoved<Int>(issue.id)
+            }
 
-//        scope.toLifetime().callWhenTerminated {
-//            allIssueSubscriptions.remove(subscription)
-//        }
-
-        // fixme: create a scope from lifetime
-        scope.launch {
-            delay(500)
-            listChangedFlow.emit(IterableModificationEventReset(issues))
-
-            delay(500)
-            listChangedFlow.emit(IterableModificationEventRemoved(3))
+            scope.launch {
+                listChangedFlow.emit(event)
+            }
         }
 
-        return subscription
+        val elementChangedFlow = MutableSharedFlow<Pair<Int, IssueChangedEvent>>()
+
+        issueChangeSubscriptions.add(object : IssueChangedCheckedSubscription {
+            override fun emit(beforeModification: Issue, modificationEvent: IssueChangedEvent) {
+                scope.launch {
+                    elementChangedFlow.emit(beforeModification.id to modificationEvent)
+                }
+            }
+        })
+
+        return InitializedIssueListUpdates(issues, listChangedFlow, elementChangedFlow)
+    }
+
+    fun subscribeToAssigneeIssues(scope: CoroutineScope, assigneeId: Int): InitializedIssueListUpdates {
+        val assigneeIssues = transaction(db) {
+            IssuesTable
+                .selectAll()
+                .where { IssuesTable.assigneeId eq assigneeId }
+                .map {
+                    Issue(
+                        id = it[IssuesTable.id].value,
+                        title = it[IssuesTable.title],
+                        assigneeId = it[IssuesTable.assigneeId],
+                        isCompleted = it[IssuesTable.isCompleted]
+                    )
+                }
+        }
+
+        val listChangedFlow = MutableSharedFlow<IterableModificationEvent<Int, Issue>>()
+
+        issueAdditionRemovalSubscription.add { isAdded: Boolean, issue: Issue ->
+            if (issue.assigneeId == assigneeId) {
+                val event = if (isAdded) {
+                    IterableModificationEventAdded<Issue>(issue)
+                } else {
+                    IterableModificationEventRemoved<Int>(issue.id)
+                }
+
+                scope.launch {
+                    listChangedFlow.emit(event)
+                }
+            }
+        }
+
+        val elementChangedFlow = MutableSharedFlow<Pair<Int, IssueChangedEvent>>()
+
+        issueChangeSubscriptions.add(object : IssueChangedCheckedSubscription {
+            override fun emit(beforeModification: Issue, modificationEvent: IssueChangedEvent) {
+                if (modificationEvent is AssigneeIdChanged) {
+                    when {
+                        beforeModification.assigneeId != assigneeId && modificationEvent.assigneeId == assigneeId -> {
+                            // element added
+                            scope.launch {
+                                val afterModification = beforeModification.copy(assigneeId = modificationEvent.assigneeId)
+                                listChangedFlow.emit(IterableModificationEventAdded(afterModification))
+                            }
+                        }
+                        beforeModification.assigneeId == assigneeId && modificationEvent.assigneeId != assigneeId -> {
+                            // element removed
+                            scope.launch {
+                                listChangedFlow.emit(IterableModificationEventRemoved(beforeModification.id))
+                            }
+                        }
+                    }
+                } else {
+                    // assignee didn't change, can trust beforeModification
+                    if (beforeModification.assigneeId == assigneeId) {
+                        scope.launch {
+                            elementChangedFlow.emit(beforeModification.id to modificationEvent)
+                        }
+                    }
+                }
+            }
+        })
+
+        return InitializedIssueListUpdates(assigneeIssues, listChangedFlow, elementChangedFlow)
     }
 
     fun getIssue(issueId: Int) = transaction(db) {
@@ -100,24 +184,29 @@ class IssueManager(private val db: Database) {
 
     fun setIsCompleted(issueId: Int, isCompleted: Boolean) {
         val issue = transaction(db) {
+            val issueBeforeModification = getIssueInTransaction(issueId) ?: error("Issue not found")
             // todo: update + select
             IssuesTable.update(where = { IssuesTable.id eq issueId }) {
                 it[IssuesTable.isCompleted] = isCompleted
             }
 
-            getIssueInTransaction(issueId) ?: error("Issue not found")
+            issueBeforeModification
         }
+
+        // todo: list events (filter by isCompleted)
 
         broadcastIssueModificationEvent(issue, IsCompletedChanged(isCompleted))
     }
 
     fun setTitle(issueId: Int, title: String) {
         val issue = transaction(db) {
+            val issueBeforeModification = getIssueInTransaction(issueId) ?: error("Issue not found")
+
             IssuesTable.update(where = { IssuesTable.id eq issueId }) {
                 it[IssuesTable.title] = title
             }
 
-            getIssueInTransaction(issueId) ?: error("Issue not found")
+            issueBeforeModification
         }
 
         broadcastIssueModificationEvent(issue, TitleChanged(title))
@@ -125,22 +214,24 @@ class IssueManager(private val db: Database) {
 
     fun setAssigneeId(issueId: Int, assigneeId: Int?) {
         val issue = transaction(db) {
+            val issueBeforeModification = getIssueInTransaction(issueId) ?: error("Issue not found")
             IssuesTable.update(where = { IssuesTable.id eq issueId }) {
                 it[IssuesTable.assigneeId] = assigneeId
             }
 
-            getIssueInTransaction(issueId) ?: error("Issue not found")
+            issueBeforeModification
         }
 
         broadcastIssueModificationEvent(issue, AssigneeIdChanged(assigneeId))
     }
 }
 
+typealias AddedRemovedSubscription<T> = (isAdded: Boolean, issue: T) -> Unit
+
 typealias IssueChangedCheckedSubscription = CheckedSubscription<Issue, IssueChangedEvent>
 
 interface CheckedSubscription<T, E> {
-    fun check(item: T): Boolean
-    fun emit(event: E)
+    fun emit(beforeModification: T, modificationEvent: E)
 }
 
 class FlowSubscription<T, E>(
@@ -148,11 +239,11 @@ class FlowSubscription<T, E>(
     private val flow: FlowCollector<E>,
     private val checkItem: (T) -> Boolean,
 ): CheckedSubscription<T, E> {
-    override fun check(item: T) = checkItem(item)
-
-    override fun emit(event: E) {
-        scope.launch {
-            flow.emit(event)
+    override fun emit(beforeModification: T, modificationEvent: E) {
+        if (checkItem(beforeModification)) {
+            scope.launch {
+                flow.emit(modificationEvent)
+            }
         }
     }
 }

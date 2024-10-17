@@ -1,7 +1,7 @@
 import { withLoader } from '../Loader.tsx';
 import { useRequest, useScopeEffect } from '../hooks.ts';
-import { InitializedCollector, KtorRPCClient } from 'kmp-playground-client';
-import { IssueApiWrapper, ScopeProxy } from 'kmp-playground-client';
+import { InitializedEventFlow, KtorRPCClient } from 'kmp-playground-client';
+import { Issue, IssueApiWrapper } from 'kmp-playground-client';
 import { homePageBreadcrumb, PageLayout } from './PageLayout.tsx';
 import { pages } from '../Router.tsx';
 import { useState } from 'react';
@@ -23,9 +23,9 @@ export function IssuesSingle(props: { rpcClient: KtorRPCClient, issueId: number 
    )
 }
 
-function IssueRenderer({ collector, api }: { collector: InitializedCollector, api: IssueApiWrapper }) {
+function IssueRenderer({ collector, api }: { collector: InitializedEventFlow<Issue>, api: IssueApiWrapper }) {
    const [issue, setIssue] = useState(() => collector.initialValue)
-   useScopeEffect(scope => {
+   useScopeEffect(() => {
       collector.listenToUpdates(setIssue)
    }, [])
    const [title, setTitle] = useState(issue.title)

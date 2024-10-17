@@ -1,6 +1,5 @@
 package org.kmp
 
-import kotlinx.coroutines.*
 import org.kmp.manager.IssueManager
 import org.kmp.manager.UserManager
 import kotlin.coroutines.CoroutineContext
@@ -21,11 +20,6 @@ class IssueApiHandler(
         return issueManager.getIssue(issueId)
     }
 
-    override suspend fun getIssueEventFlow(): IssueListUpdates {
-        // todo: generate subscription id, return it alongside with the flow
-        return issueManager.listenToIssues(GlobalScope)
-    }
-
     override suspend fun setTitle(issueId: Int, title: String) {
         issueManager.setTitle(issueId, title)
     }
@@ -36,6 +30,14 @@ class IssueApiHandler(
 
     override suspend fun subscribeToIssue(issueId: Int): InitializedFlow<Issue, IssueChangedEvent>? {
         return issueManager.subscribeToIssue(this, issueId)
+    }
+
+    override suspend fun subscribeToAllIssues(): InitializedIssueListUpdates {
+        return issueManager.subscribeToAllIssues(this)
+    }
+
+    override suspend fun subscribeToSingleIssue(issueId: Int): InitializedIssueListUpdates {
+        return issueManager.subscribeToAssigneeIssues(this, issueId)
     }
 }
 
