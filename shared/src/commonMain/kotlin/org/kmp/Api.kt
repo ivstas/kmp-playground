@@ -11,7 +11,7 @@ interface IssueApi: RPC {
 
     suspend fun subscribeToIssue(issueId: Int): InitializedFlow<Issue, IssueChangedEvent>?
     suspend fun subscribeToAllIssues(): InitializedIssueListUpdates
-    suspend fun subscribeToSingleIssue(issueId: Int): InitializedIssueListUpdates
+    suspend fun subscribeToAssigneeIssues(assigneeId: Int): InitializedIssueListUpdates
 }
 
 interface UserApi: RPC {

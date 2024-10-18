@@ -58,6 +58,30 @@ class IssueApiWrapper(private val rpcClient: KtorRPCClient) {
         }
     }
 
+    fun subscribeToAssigneeIssues(
+        scope: CoroutineScope,
+        assigneeId: Int,
+    ): Promise<InitializedEventFlow<List<Issue>>> {
+        return Promise { resolve, reject ->
+            scope.launch {
+                streamScoped {
+                    val initializedIssueListUpdates = try {
+                        rpcClient.withService<IssueApi>().subscribeToAssigneeIssues(assigneeId)
+                    } catch (e: Throwable) {
+                        reject(e)
+                        return@streamScoped // ends the subscription
+                    }
+
+                    launch {
+                        resolve(InitializedIssueListEventFlow(this@streamScoped, initializedIssueListUpdates))
+                    }
+
+                    awaitCancellation() // keeps the subscription alive
+                }
+            }
+        }
+    }
+
     fun subscribeToIssue(
         scope: CoroutineScope,
         issueId: Int,

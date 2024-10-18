@@ -36,8 +36,8 @@ class IssueApiHandler(
         return issueManager.subscribeToAllIssues(this)
     }
 
-    override suspend fun subscribeToSingleIssue(issueId: Int): InitializedIssueListUpdates {
-        return issueManager.subscribeToAssigneeIssues(this, issueId)
+    override suspend fun subscribeToAssigneeIssues(assigneeId: Int): InitializedIssueListUpdates {
+        return issueManager.subscribeToAssigneeIssues(this, assigneeId)
     }
 }
 
