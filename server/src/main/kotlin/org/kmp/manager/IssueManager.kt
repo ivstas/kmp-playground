@@ -2,11 +2,9 @@ package org.kmp.manager
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.update
 import org.kmp.*
 import org.kmp.IssuesTable
 import org.rsp.*
@@ -17,6 +15,8 @@ class IssueManager(private val db: Database) {
         val entity = transaction(db) {
             IssuesTable.insert {
                 it[title] = issueIn.title
+                it[assigneeId] = issueIn.assigneeId
+                it[isCompleted] = issueIn.isCompleted
             }
         }
 
@@ -32,6 +32,21 @@ class IssueManager(private val db: Database) {
         issueAdditionRemovalSubscription.forEach { it(true, issue) }
 
         return issue.id
+    }
+
+    fun removeIssue(issueId: Int) {
+        val issue = transaction {
+            val issue = IssuesTable.selectAll().where { IssuesTable.id eq issueId }.singleOrNull()?.toIssue()
+                ?: error("Issue $issueId not found")
+
+            if (IssuesTable.deleteWhere { IssuesTable.id eq issueId } == 0) {
+                error("Failed to delete issue $issueId")
+            }
+
+            issue
+        }
+
+        issueAdditionRemovalSubscription.forEach { it(false, issue) }
     }
 
     fun getIssues() = transaction(db) {
@@ -78,10 +93,10 @@ class IssueManager(private val db: Database) {
         val listChangedFlow = MutableSharedFlow<IterableModificationEvent<Int, Issue>>()
 
         issueAdditionRemovalSubscription.add { isAdded: Boolean, issue: Issue ->
-            val event = if (isAdded) {
-                IterableModificationEventAdded<Issue>(issue)
+            val event: IterableModificationEvent<Int, Issue> = if (isAdded) {
+                IterableModificationEventAdded(issue)
             } else {
-                IterableModificationEventRemoved<Int>(issue.id)
+                IterableModificationEventRemoved(issue.id)
             }
 
             scope.launch {
@@ -121,10 +136,10 @@ class IssueManager(private val db: Database) {
 
         issueAdditionRemovalSubscription.add { isAdded: Boolean, issue: Issue ->
             if (issue.assigneeId == assigneeId) {
-                val event = if (isAdded) {
-                    IterableModificationEventAdded<Issue>(issue)
+                val event: IterableModificationEvent<Int,Issue> = if (isAdded) {
+                    IterableModificationEventAdded(issue)
                 } else {
-                    IterableModificationEventRemoved<Int>(issue.id)
+                    IterableModificationEventRemoved(issue.id)
                 }
 
                 scope.launch {
@@ -173,14 +188,8 @@ class IssueManager(private val db: Database) {
 
     private fun getIssueInTransaction(issueId: Int) = IssuesTable.selectAll().where {
         IssuesTable.id eq issueId
-    }.map {
-        Issue(
-            id = it[IssuesTable.id].value,
-            title = it[IssuesTable.title],
-            assigneeId = it[IssuesTable.assigneeId],
-            isCompleted = it[IssuesTable.isCompleted]
-        )
-    }.firstOrNull()
+    }.map(ResultRow::toIssue).firstOrNull()
+
 
     fun setIsCompleted(issueId: Int, isCompleted: Boolean) {
         val issue = transaction(db) {
@@ -225,6 +234,13 @@ class IssueManager(private val db: Database) {
         broadcastIssueModificationEvent(issue, AssigneeIdChanged(assigneeId))
     }
 }
+
+private fun ResultRow.toIssue() = Issue(
+    id = this[IssuesTable.id].value,
+    title = this[IssuesTable.title],
+    assigneeId = this[IssuesTable.assigneeId],
+    isCompleted = this[IssuesTable.isCompleted]
+)
 
 typealias AddedRemovedSubscription<T> = (isAdded: Boolean, issue: T) -> Unit
 

@@ -22,6 +22,13 @@ class IssueApiWrapper(private val rpcClient: KtorRPCClient) {
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
+    fun removeIssue(issueId: Int, scope: CoroutineScope = GlobalScope): Promise<Unit> {
+        return scope.promise {
+            rpcClient.withService<IssueApi>().removeIssue(issueId)
+        }
+    }
+
     fun getIssues(scope: CoroutineScope): Promise<Array<Issue>> {
         return scope.promise {
             rpcClient.withService<IssueApi>().getIssues().toTypedArray()

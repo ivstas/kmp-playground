@@ -12,6 +12,10 @@ class IssueApiHandler(
         return issueManager.addIssue(issueIn)
     }
 
+    override suspend fun removeIssue(issueId: Int) {
+        issueManager.removeIssue(issueId)
+    }
+
     override suspend fun getIssues(): List<Issue> {
         return issueManager.getIssues()
     }

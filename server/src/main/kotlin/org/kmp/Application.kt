@@ -59,35 +59,32 @@ private fun fillTestData(db: Database) {
                 cassandra,
             )
         ) {
-            this[UsersTable.id] = it.id
             this[UsersTable.name] = it.name
         }
 
         val issues = listOf(
-            Issue(1, "Create kmp app using wizard", alice.id, true),
-            Issue(2, "Add client and web modules", john.id, true),
-            Issue(3, "Add rpc", john.id),
-            Issue(4, "Add database, initialize tables and fill the data", alexander.id),
-            Issue(5, "Login page throws error", john.id),
-            Issue(6, "Add search functionality", alice.id),
-            Issue(7, "Update user guide", cassandra.id),
-            Issue(8, "Slow page loading times", alexander.id),
+            IssueIn("Create kmp app using wizard", alice.id, true),
+            IssueIn("Add client and web modules", john.id, true),
+            IssueIn("Add rpc", john.id),
+            IssueIn("Add database, initialize tables and fill the data", alexander.id),
+            IssueIn("Login page throws error", john.id),
+            IssueIn("Add search functionality", alice.id),
+            IssueIn("Update user guide", cassandra.id),
+            IssueIn("Slow page loading times", alexander.id),
         )
 
         IssuesTable.batchInsert(issues) {
-            this[IssuesTable.id] = it.id
             this[IssuesTable.title] = it.title
             this[IssuesTable.assigneeId] = it.assigneeId
             this[IssuesTable.isCompleted] = it.isCompleted
         }
 
         TagsTable.batchInsert(listOf(
-            Tag(1, "bug"),
-            Tag(2, "feature"),
-            Tag(3, "setup"),
-            Tag(4, "documentation"),
+            TagIn("bug"),
+            TagIn("feature"),
+            TagIn("setup"),
+            TagIn("documentation"),
         )) {
-            this[TagsTable.id] = it.id
             this[TagsTable.title] = it.title
         }
 

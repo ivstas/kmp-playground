@@ -2,6 +2,7 @@ package org.kmp
 
 import org.jetbrains.exposed.dao.id.CompositeIdTable
 import org.jetbrains.exposed.dao.id.IntIdTable
+import org.jetbrains.exposed.sql.ReferenceOption
 
 const val MAX_VARCHAR_LENGTH = 128
 
@@ -21,7 +22,7 @@ object TagsTable : IntIdTable() {
 }
 
 object IssuesTagsTable : CompositeIdTable() {
-    val issueId = integer("issue_id").references(IssuesTable.id)
+    val issueId = integer("issue_id").references(IssuesTable.id, onDelete = ReferenceOption.CASCADE)
     val tagId = integer("tag_id").references(TagsTable.id)
 
     override val primaryKey = PrimaryKey(issueId, tagId)
