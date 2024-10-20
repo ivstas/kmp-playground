@@ -54,9 +54,11 @@ data class InitializedFlow<T, E>(
     @Contextual val flow: Flow<E>,
 )
 
+typealias InitializedIssueListUpdates = InitializedListUpdates<Issue, Int, IssueChangedEvent>
+
 @Serializable
-data class InitializedIssueListUpdates(
-    val initialValue: List<Issue>,
-    @Contextual val listChangedFlow: Flow<IterableModificationEvent<Int, Issue>>,
-    @Contextual val elementChangedFlow: Flow<Pair<Int, IssueChangedEvent>>,
+data class InitializedListUpdates<T, ID, E>(
+    val initialValue: List<T>,
+    @Contextual val listChangedFlow: Flow<IterableModificationEvent<ID, T>>,
+    @Contextual val elementChangedFlow: Flow<Pair<ID, E>>,
 )

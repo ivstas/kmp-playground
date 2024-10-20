@@ -210,7 +210,7 @@ class InitializedIssueCollector(
 }
 
 private fun Issue.updateWith(event: IssueChangedEvent) = when (event) {
-    is TitleChanged -> copy(title = event.title)
-    is IsCompletedChanged -> copy(isCompleted = event.isCompleted)
-    is AssigneeIdChanged -> copy(assigneeId = event.assigneeId)
+    is IssueChangedEvent.Title -> copy(title = event.title)
+    is IssueChangedEvent.IsCompleted -> copy(isCompleted = event.isCompleted)
+    is IssueChangedEvent.AssigneeId -> copy(assigneeId = event.assigneeId)
 }

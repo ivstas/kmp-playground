@@ -93,7 +93,7 @@ class IssueManager(private val db: Database) {
         val listChangedFlow = MutableSharedFlow<IterableModificationEvent<Int, Issue>>()
 
         issueAdditionRemovalSubscription.add { isAdded: Boolean, issue: Issue ->
-            val event: IterableModificationEvent<Int, Issue> = if (isAdded) {
+            val event = if (isAdded) {
                 IterableModificationEventAdded(issue.id, issue)
             } else {
                 IterableModificationEventRemoved(issue.id)
@@ -136,7 +136,7 @@ class IssueManager(private val db: Database) {
 
         issueAdditionRemovalSubscription.add { isAdded: Boolean, issue: Issue ->
             if (issue.assigneeId == assigneeId) {
-                val event: IterableModificationEvent<Int,Issue> = if (isAdded) {
+                val event = if (isAdded) {
                     IterableModificationEventAdded(issue.id, issue)
                 } else {
                     IterableModificationEventRemoved(issue.id)
@@ -152,7 +152,7 @@ class IssueManager(private val db: Database) {
 
         issueChangeSubscriptions.add(object : IssueChangedCheckedSubscription {
             override fun emit(beforeModification: Issue, modificationEvent: IssueChangedEvent) {
-                if (modificationEvent is AssigneeIdChanged) {
+                if (modificationEvent is IssueChangedEvent.AssigneeId) {
                     when {
                         beforeModification.assigneeId != assigneeId && modificationEvent.assigneeId == assigneeId -> {
                             // element added
@@ -204,7 +204,7 @@ class IssueManager(private val db: Database) {
 
         // todo: list events (filter by isCompleted)
 
-        broadcastIssueModificationEvent(issue, IsCompletedChanged(isCompleted))
+        broadcastIssueModificationEvent(issue, IssueChangedEvent.IsCompleted(isCompleted))
     }
 
     fun setTitle(issueId: Int, title: String) {
@@ -218,7 +218,7 @@ class IssueManager(private val db: Database) {
             issueBeforeModification
         }
 
-        broadcastIssueModificationEvent(issue, TitleChanged(title))
+        broadcastIssueModificationEvent(issue, IssueChangedEvent.Title(title))
     }
 
     fun setAssigneeId(issueId: Int, assigneeId: Int?) {
@@ -231,7 +231,7 @@ class IssueManager(private val db: Database) {
             issueBeforeModification
         }
 
-        broadcastIssueModificationEvent(issue, AssigneeIdChanged(assigneeId))
+        broadcastIssueModificationEvent(issue, IssueChangedEvent.AssigneeId(assigneeId))
     }
 }
 
