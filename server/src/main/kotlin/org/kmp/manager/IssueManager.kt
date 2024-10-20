@@ -84,6 +84,7 @@ class IssueManager(private val db: Database) {
 //            singleIssueSubscriptions.remove(subscription) 
 //        }
 
+        // todo: could also be deleted, add such flow
         return InitializedFlow(issue, flow)
     }
 

@@ -56,7 +56,7 @@ class IssueApiWrapper(private val rpcClient: KtorRPCClient) {
                     }
 
                     launch {
-                        resolve(InitializedIssueListEventFlow(this@streamScoped, initializedIssueListUpdates))
+                        resolve(initializedIssueListEventFlow(this@streamScoped, initializedIssueListUpdates))
                     }
 
                     awaitCancellation() // keeps the subscription alive
@@ -80,7 +80,7 @@ class IssueApiWrapper(private val rpcClient: KtorRPCClient) {
                     }
 
                     launch {
-                        resolve(InitializedIssueListEventFlow(this@streamScoped, initializedIssueListUpdates))
+                        resolve(initializedIssueListEventFlow(this@streamScoped, initializedIssueListUpdates))
                     }
 
                     awaitCancellation() // keeps the subscription alive
@@ -115,12 +115,14 @@ class IssueApiWrapper(private val rpcClient: KtorRPCClient) {
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     fun setTitle(issueId: Int, title: String, scope: CoroutineScope = GlobalScope): Promise<Unit> {
         return scope.promise {
             rpcClient.withService<IssueApi>().setTitle(issueId, title)
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     fun setIsCompleted(issueId: Int, isCompleted: Boolean, scope: CoroutineScope = GlobalScope): Promise<Unit> {
         return scope.promise {
             rpcClient.withService<IssueApi>().setIsCompleted(issueId, isCompleted)
@@ -160,19 +162,30 @@ interface InitializedEventFlow<T> {
     fun listenToUpdates(update: (mapper: (T) -> T) -> Unit)
 }
 
+fun initializedIssueListEventFlow(
+    scope: CoroutineScope,
+    initializedIssueListUpdates: InitializedListUpdates<Issue, Int, IssueChangedEvent>,
+) = InitializedListEventFlow(
+    scope,
+    initializedIssueListUpdates,
+    Issue::id,
+    Issue::updateWith,
+)
 
-class InitializedIssueListEventFlow(
+class InitializedListEventFlow<T, ID, E>(
     private val scope: CoroutineScope,
-    private val initializedIssueListUpdates: InitializedIssueListUpdates,
-): InitializedEventFlow<List<Issue>> {
+    private val initializedIssueListUpdates: InitializedListUpdates<T, ID, E>,
+    private val getId: (T) -> ID,
+    private val updateWith: T.(E) -> T,
+): InitializedEventFlow<List<T>> {
     override val initialValue = initializedIssueListUpdates.initialValue
-    override fun listenToUpdates(update: (mapper: (List<Issue>) -> List<Issue>) -> Unit) {
+    override fun listenToUpdates(update: (mapper: (List<T>) -> List<T>) -> Unit) {
         scope.launch {
             initializedIssueListUpdates.listChangedFlow.collect { listModificationEvent ->
                 update { current ->
                     when (listModificationEvent) {
                         is IterableModificationEventAdded -> current + listModificationEvent.item
-                        is IterableModificationEventRemoved -> current.filter { it.id != listModificationEvent.id }
+                        is IterableModificationEventRemoved -> current.filter { getId(it) != listModificationEvent.id }
                     }
                 }
             }
@@ -180,11 +193,11 @@ class InitializedIssueListEventFlow(
         scope.launch {
             initializedIssueListUpdates.elementChangedFlow.collect { (id, event) ->
                 update { current ->
-                    current.map { issue ->
-                        if (issue.id == id) {
-                            issue.updateWith(event)
+                    current.map { element ->
+                        if (getId(element) == id) {
+                            element.updateWith(event)
                         } else {
-                            issue
+                            element
                         }
                     }
                 }
