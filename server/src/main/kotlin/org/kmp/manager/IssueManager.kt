@@ -94,7 +94,7 @@ class IssueManager(private val db: Database) {
 
         issueAdditionRemovalSubscription.add { isAdded: Boolean, issue: Issue ->
             val event: IterableModificationEvent<Int, Issue> = if (isAdded) {
-                IterableModificationEventAdded(issue)
+                IterableModificationEventAdded(issue.id, issue)
             } else {
                 IterableModificationEventRemoved(issue.id)
             }
@@ -137,7 +137,7 @@ class IssueManager(private val db: Database) {
         issueAdditionRemovalSubscription.add { isAdded: Boolean, issue: Issue ->
             if (issue.assigneeId == assigneeId) {
                 val event: IterableModificationEvent<Int,Issue> = if (isAdded) {
-                    IterableModificationEventAdded(issue)
+                    IterableModificationEventAdded(issue.id, issue)
                 } else {
                     IterableModificationEventRemoved(issue.id)
                 }
@@ -158,7 +158,7 @@ class IssueManager(private val db: Database) {
                             // element added
                             scope.launch {
                                 val afterModification = beforeModification.copy(assigneeId = modificationEvent.assigneeId)
-                                listChangedFlow.emit(IterableModificationEventAdded(afterModification))
+                                listChangedFlow.emit(IterableModificationEventAdded(afterModification.id, afterModification))
                             }
                         }
                         beforeModification.assigneeId == assigneeId && modificationEvent.assigneeId != assigneeId -> {

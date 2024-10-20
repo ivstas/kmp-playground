@@ -33,6 +33,7 @@ kotlin {
         commonMain.dependencies {
             // put your Multiplatform dependencies here
             implementation(libs.kotlinx.rpc.core)
+            implementation(libs.kotlinx.serialization.core)
             implementation(libs.kotlinx.serialization.json)
         }
     }

@@ -5,7 +5,7 @@ junit = "4.13.2"
 kotlin = "2.0.0" # Do not change this to 2.0.20, it breaks kotlin-rpc
 ktor = "2.3.12"
 logback = "1.5.6"
-kotlinx-serialization-json = "1.6.3"
+kotlinx-serialization = "1.6.3"
 kotlinx-rpc = "0.2.4"
 exposed = "0.53.0"
 
@@ -27,7 +27,8 @@ ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
 exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
 
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
+kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 # kotlinx-rpc (version.ref is set by kotlinx-rpc-platform plugin)
 kotlinx-rpc-core = { module = "org.jetbrains.kotlinx:kotlinx-rpc-core" }
 kotlinx-rpc-krpc-client = { module = "org.jetbrains.kotlinx:kotlinx-rpc-krpc-client" }
