@@ -45,7 +45,7 @@ data class Tag(
 
 @Serializable
 data class UserUpdates(
-    @Contextual val userChangedFlow: Flow<UserEvent>,
+    @Contextual val userChangedFlow: Flow<UserChangedEvent>,
 )
 
 @Serializable

@@ -128,6 +128,13 @@ class IssueApiWrapper(private val rpcClient: KtorRPCClient) {
             rpcClient.withService<IssueApi>().setIsCompleted(issueId, isCompleted)
         }
     }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    fun setAssigneeId(issueId: Int, assigneeId: Int, scope: CoroutineScope = GlobalScope): Promise<Unit> {
+        return scope.promise {
+            rpcClient.withService<IssueApi>().setAssigneeId(issueId, assigneeId)
+        }
+    }
 }
 
 @Suppress("unused")
@@ -138,6 +145,13 @@ class UserApiWrapper(private val rpcClient: KtorRPCClient) {
         return scope.promise {
             rpcClient.withService<UserApi>().getUser(userId)
         }
+    }
+
+    fun subscribeToAllUsers(scope: CoroutineScope) = scope.subscribeToList(
+        User::id,
+        User::updateWith,
+    ) {
+        rpcClient.withService<UserApi>().subscribeToAllUsers()
     }
 }
 
@@ -170,6 +184,16 @@ fun initializedIssueListEventFlow(
     initializedIssueListUpdates,
     Issue::id,
     Issue::updateWith,
+)
+
+fun initializedUserEventFlow(
+    scope: CoroutineScope,
+    initializedUserListUpdates: InitializedListUpdates<User, Int, UserChangedEvent>,
+) = InitializedListEventFlow(
+    scope,
+    initializedUserListUpdates,
+    User::id,
+    User::updateWith,
 )
 
 class InitializedListEventFlow<T, ID, E>(
@@ -226,4 +250,38 @@ private fun Issue.updateWith(event: IssueChangedEvent) = when (event) {
     is IssueChangedEvent.Title -> copy(title = event.title)
     is IssueChangedEvent.IsCompleted -> copy(isCompleted = event.isCompleted)
     is IssueChangedEvent.AssigneeId -> copy(assigneeId = event.assigneeId)
+}
+
+private fun User.updateWith(event: UserChangedEvent) = when (event) {
+    is UserChangedEvent.NameChanged -> copy(name = event.name)
+}
+
+fun <T, ID, E> CoroutineScope.subscribeToList(
+    getId: (T) -> ID,
+    updateWith: T.(E) -> T,
+    subscribe: suspend () -> InitializedListUpdates<T, ID, E>
+) = Promise { resolve, reject ->
+    launch {
+        streamScoped {
+            val initializedIssueListUpdates = try {
+                subscribe()
+            } catch (e: Throwable) {
+                reject(e)
+                return@streamScoped // ends the subscription
+            }
+
+            launch {
+                resolve(
+                    InitializedListEventFlow(
+                        this@streamScoped, // important!
+                        initializedIssueListUpdates,
+                        getId,
+                        updateWith,
+                    )
+                )
+            }
+
+            awaitCancellation() // keeps the subscription alive
+        }
+    }
 }

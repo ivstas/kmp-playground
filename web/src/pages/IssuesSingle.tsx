@@ -1,7 +1,14 @@
 import { withLoader } from '../Loader.tsx';
 import { useRequest, useScopeEffect } from '../hooks.ts';
-import { InitializedEventFlow, KtorRPCClient } from 'kmp-playground-client';
-import { Issue, IssueApiWrapper } from 'kmp-playground-client';
+import {
+   InitializedEventFlow,
+   Issue,
+   IssueApiWrapper,
+   KtorRPCClient,
+   Nullable,
+   User,
+   UserApiWrapper,
+} from 'kmp-playground-client';
 import { homePageBreadcrumb, PageLayout } from './PageLayout.tsx';
 import { pages } from '../Router.tsx';
 import { useState } from 'react';
@@ -15,7 +22,7 @@ export function IssuesSingle(props: { rpcClient: KtorRPCClient, issueId: number 
       <PageLayout breadcrumbs={[homePageBreadcrumb, { text: 'All issues', href: pages.issues }, { text: 'Issue' }]}>
          <div className="mx-6 my-3">
             {withLoader(loadingIssue, (loadingIssue) => loadingIssue
-               ? <IssueRenderer collector={loadingIssue} api={api} />
+               ? <IssueRenderer collector={loadingIssue} api={api} client={props.rpcClient} />
                : <div>Issue {props.issueId} not found</div>,
             )}
          </div>
@@ -23,7 +30,7 @@ export function IssuesSingle(props: { rpcClient: KtorRPCClient, issueId: number 
    )
 }
 
-function IssueRenderer({ collector, api }: { collector: InitializedEventFlow<Issue>, api: IssueApiWrapper }) {
+function IssueRenderer({ collector, api, client }: { collector: InitializedEventFlow<Issue>, api: IssueApiWrapper, client: KtorRPCClient }) {
    const [issue, setIssue] = useState(() => collector.initialValue)
    useScopeEffect(() => {
       collector.listenToUpdates(setIssue)
@@ -74,7 +81,63 @@ function IssueRenderer({ collector, api }: { collector: InitializedEventFlow<Iss
             </label>
          </div>
 
-         <div>Assignee: {issue.assigneeId}</div>
+         <AssigneeLoader
+            client={client}
+            assigneeId={issue.assigneeId}
+            changeAssignee={id => api.setAssigneeId(issue.id, id)}
+         />
       </div>
+   )
+}
+
+function AssigneeLoader({ client, assigneeId, changeAssignee }: { client: KtorRPCClient, assigneeId: Nullable<number>, changeAssignee: (id: number) => void, }) {
+   const [api] = useState(() => new UserApiWrapper(client))
+
+   const request = useRequest(scope => api.subscribeToAllUsers(scope), [])
+
+   return withLoader(request, (initializedEventFlow) => (
+      <AssigneeSelector
+         initializedEventFlow={initializedEventFlow}
+         assigneeId={assigneeId}
+         changeAssignee={changeAssignee}
+      />
+   ))
+}
+
+function AssigneeSelector({
+   initializedEventFlow,
+   assigneeId,
+   changeAssignee,
+}: {
+    initializedEventFlow: InitializedEventFlow<KtList<User>>,
+    assigneeId: Nullable<number>,
+    changeAssignee: (id: number) => void,
+}) {
+   const [userList, setUserList] = useState(() => initializedEventFlow.initialValue)
+   useScopeEffect(() => {
+      initializedEventFlow.listenToUpdates(setUserList)
+   }, [])
+
+   const users: User[] = userList.toArray()
+
+   return (
+      <select
+         value={assigneeId || ''}
+         className="select select-bordered w-full max-w-xs"
+         onChange={e => {
+            const id = Number.parseInt(e.currentTarget.value);
+            if (isNaN(id)) {
+               return; // todo: set assignee to null
+            }
+            changeAssignee(id)
+         }}
+      >
+         {users.map(user => (
+            <option
+               key={user.id}
+               value={user.id.toString()}
+            >{user.name}</option>
+         ))}
+      </select>
    )
 }

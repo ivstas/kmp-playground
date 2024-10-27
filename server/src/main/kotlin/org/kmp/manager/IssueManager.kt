@@ -247,6 +247,7 @@ typealias AddedRemovedSubscription<T> = (isAdded: Boolean, issue: T) -> Unit
 
 typealias IssueChangedCheckedSubscription = CheckedSubscription<Issue, IssueChangedEvent>
 
+// todo: rename
 interface CheckedSubscription<T, E> {
     fun emit(beforeModification: T, modificationEvent: E)
 }

@@ -32,6 +32,10 @@ class IssueApiHandler(
         issueManager.setIsCompleted(issueId, isCompleted)
     }
 
+    override suspend fun setAssigneeId(issueId: Int, assigneeId: Int) {
+        issueManager.setAssigneeId(issueId, assigneeId)
+    }
+
     override suspend fun subscribeToIssue(issueId: Int): InitializedFlow<Issue, IssueChangedEvent>? {
         return issueManager.subscribeToIssue(this, issueId)
     }
@@ -51,5 +55,13 @@ class UserApiHandler(
 ): UserApi {
     override suspend fun getUser(userId: Int): User? {
         return userManager.getUser(userId)
+    }
+
+    override suspend fun changeUserName(userId: Int, name: String) {
+        userManager.setName(userId, name)
+    }
+
+    override suspend fun subscribeToAllUsers(): InitializedListUpdates<User, Int, UserChangedEvent> {
+        return userManager.subscribeToAllUsers(this)
     }
 }
