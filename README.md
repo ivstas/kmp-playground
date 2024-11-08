@@ -1,9 +1,7 @@
 ## Development workflow
 
 ### 1. Assemble ES client module from kotlin/js sources
-Either run `:client:jsBrowserDevelopmentLibraryDistribution` or use corresponding run configuration in project.
-
-The development build is used until [this kRPC bug is fixed](https://github.com/Kotlin/kotlinx-rpc/issues/178)
+Either run `:client:jsBrowserProductionLibraryDistribution` or use corresponding run configuration in project.
 
 ### 2. Build the js bundle
 Run `npm install` *once* in **web** directory to install dependencies.
