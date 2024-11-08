@@ -6,11 +6,11 @@ import kotlinx.browser.window
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.promise
-import kotlinx.rpc.serialization.json
-import kotlinx.rpc.transport.ktor.client.KtorRPCClient
-import kotlinx.rpc.transport.ktor.client.installRPC
-import kotlinx.rpc.transport.ktor.client.rpc
-import kotlinx.rpc.transport.ktor.client.rpcConfig
+import kotlinx.rpc.krpc.serialization.json.json
+import kotlinx.rpc.krpc.ktor.client.KtorRPCClient
+import kotlinx.rpc.krpc.ktor.client.installRPC
+import kotlinx.rpc.krpc.ktor.client.rpc
+import kotlinx.rpc.krpc.ktor.client.rpcConfig
 import kotlin.js.Promise
 
 @Suppress("NON_EXPORTABLE_TYPE")

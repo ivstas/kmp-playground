@@ -4,9 +4,9 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.routing.*
-import kotlinx.rpc.serialization.json
-import kotlinx.rpc.transport.ktor.server.RPC
-import kotlinx.rpc.transport.ktor.server.rpc
+import kotlinx.rpc.krpc.serialization.json.json
+import kotlinx.rpc.krpc.ktor.server.RPC
+import kotlinx.rpc.krpc.ktor.server.rpc
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.batchInsert
@@ -25,7 +25,7 @@ fun main() {
     val issueService = IssueManager(db)
     val userService = UserManager(db)
 
-    embeddedServer(Netty, port = SERVER_PORT, host = "0.0.0.0") {
+    embeddedServer(Netty, port = SERVER_PORT) {
         install(RPC)
         routing {
             rpc(RPC_PATH) {

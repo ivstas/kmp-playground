@@ -1,8 +1,11 @@
 package org.kmp
 
-import kotlinx.rpc.RPC
+import kotlinx.rpc.RemoteService
+import kotlinx.rpc.annotations.Rpc
 
-interface IssueApi: RPC {
+
+@Rpc
+interface IssueApi: RemoteService {
     suspend fun addIssue(issueIn: IssueIn): Int
     suspend fun removeIssue(issueId: Int)
 
@@ -17,7 +20,8 @@ interface IssueApi: RPC {
     suspend fun subscribeToAssigneeIssues(assigneeId: Int): InitializedIssueListUpdates
 }
 
-interface UserApi: RPC {
+@Rpc
+interface UserApi: RemoteService {
     suspend fun getUser(userId: Int): User?
     suspend fun subscribeToAllUsers(): InitializedListUpdates<User, Int, UserChangedEvent>
     suspend fun changeUserName(userId: Int, name: String)

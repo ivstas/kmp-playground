@@ -4,8 +4,8 @@ package org.kmp
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
-import kotlinx.rpc.streamScoped
-import kotlinx.rpc.transport.ktor.client.KtorRPCClient
+import kotlinx.rpc.krpc.streamScoped
+import kotlinx.rpc.krpc.ktor.client.KtorRPCClient
 import kotlinx.rpc.withService
 import org.rsp.IterableModificationEventAdded
 import org.rsp.IterableModificationEventRemoved

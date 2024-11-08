@@ -4,7 +4,6 @@ version = "0.1"
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
-    alias(libs.plugins.kotlinx.rpc.platform)
 }
 
 kotlin {

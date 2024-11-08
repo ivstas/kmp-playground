@@ -1,5 +1,4 @@
 plugins {
-    alias(libs.plugins.kotlinx.rpc.platform)
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.ktor)
     application
