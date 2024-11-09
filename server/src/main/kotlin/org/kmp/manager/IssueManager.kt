@@ -79,10 +79,9 @@ class IssueManager(private val db: Database) {
         val subscription: IssueChangedCheckedSubscription = FlowSubscription(scope, flow) { it.id == issueId }
 
         issueChangeSubscriptions.add(subscription)
-        // todo: unsubscribe when scope end
-//        scope.coroutineContext.job.invokeOnCompletion {
-//            singleIssueSubscriptions.remove(subscription) 
-//        }
+        scope.coroutineContext.job.invokeOnCompletion {
+            issueChangeSubscriptions.remove(subscription)
+        }
 
         // todo: could also be deleted, add such flow
         return InitializedFlow(issue, flow)
@@ -135,7 +134,7 @@ class IssueManager(private val db: Database) {
 
         val listChangedFlow = MutableSharedFlow<IterableModificationEvent<Int, Issue>>()
 
-        issueAdditionRemovalSubscription.add { isAdded: Boolean, issue: Issue ->
+        val issueAdditionRemovalSub = { isAdded: Boolean, issue: Issue ->
             if (issue.assigneeId == assigneeId) {
                 val event = if (isAdded) {
                     IterableModificationEventAdded(issue.id, issue)
@@ -149,19 +148,32 @@ class IssueManager(private val db: Database) {
             }
         }
 
+        issueAdditionRemovalSubscription.add(issueAdditionRemovalSub)
+        scope.coroutineContext.job.invokeOnCompletion {
+            issueAdditionRemovalSubscription.remove(issueAdditionRemovalSub)
+        }
+
+
         val elementChangedFlow = MutableSharedFlow<Pair<Int, IssueChangedEvent>>()
 
-        issueChangeSubscriptions.add(object : IssueChangedCheckedSubscription {
+        val issueChangeSub = object : IssueChangedCheckedSubscription {
             override fun emit(beforeModification: Issue, modificationEvent: IssueChangedEvent) {
                 if (modificationEvent is IssueChangedEvent.AssigneeId) {
                     when {
                         beforeModification.assigneeId != assigneeId && modificationEvent.assigneeId == assigneeId -> {
                             // element added
                             scope.launch {
-                                val afterModification = beforeModification.copy(assigneeId = modificationEvent.assigneeId)
-                                listChangedFlow.emit(IterableModificationEventAdded(afterModification.id, afterModification))
+                                val afterModification =
+                                    beforeModification.copy(assigneeId = modificationEvent.assigneeId)
+                                listChangedFlow.emit(
+                                    IterableModificationEventAdded(
+                                        afterModification.id,
+                                        afterModification
+                                    )
+                                )
                             }
                         }
+
                         beforeModification.assigneeId == assigneeId && modificationEvent.assigneeId != assigneeId -> {
                             // element removed
                             scope.launch {
@@ -178,7 +190,12 @@ class IssueManager(private val db: Database) {
                     }
                 }
             }
-        })
+        }
+
+        issueChangeSubscriptions.add(issueChangeSub)
+        scope.coroutineContext.job.invokeOnCompletion {
+            issueChangeSubscriptions.remove(issueChangeSub)
+        }
 
         return InitializedIssueListUpdates(assigneeIssues, listChangedFlow, elementChangedFlow)
     }
