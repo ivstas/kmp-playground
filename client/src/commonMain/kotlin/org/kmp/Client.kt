@@ -44,49 +44,21 @@ class IssueApiWrapper(private val rpcClient: KtorRPCClient) {
 
     fun subscribeToAllIssues(
         scope: CoroutineScope
-    ): Promise<InitializedEventFlow<List<Issue>>> {
-        return Promise { resolve, reject ->
-            scope.launch {
-                streamScoped {
-                    val initializedIssueListUpdates = try {
-                        rpcClient.withService<IssueApi>().subscribeToAllIssues()
-                    } catch (e: Throwable) {
-                        reject(e)
-                        return@streamScoped // ends the subscription
-                    }
-
-                    launch {
-                        resolve(initializedIssueListEventFlow(this@streamScoped, initializedIssueListUpdates))
-                    }
-
-                    awaitCancellation() // keeps the subscription alive
-                }
-            }
-        }
+    ) = scope.subscribeToList(
+        Issue::id,
+        Issue::updateWith,
+    ) {
+        rpcClient.withService<IssueApi>().subscribeToAllIssues()
     }
 
     fun subscribeToAssigneeIssues(
         scope: CoroutineScope,
         assigneeId: Int,
-    ): Promise<InitializedEventFlow<List<Issue>>> {
-        return Promise { resolve, reject ->
-            scope.launch {
-                streamScoped {
-                    val initializedIssueListUpdates = try {
-                        rpcClient.withService<IssueApi>().subscribeToAssigneeIssues(assigneeId)
-                    } catch (e: Throwable) {
-                        reject(e)
-                        return@streamScoped // ends the subscription
-                    }
-
-                    launch {
-                        resolve(initializedIssueListEventFlow(this@streamScoped, initializedIssueListUpdates))
-                    }
-
-                    awaitCancellation() // keeps the subscription alive
-                }
-            }
-        }
+    ) = scope.subscribeToList(
+        Issue::id,
+        Issue::updateWith,
+    ) {
+        rpcClient.withService<IssueApi>().subscribeToAssigneeIssues(assigneeId)
     }
 
     fun subscribeToIssue(
@@ -175,26 +147,6 @@ interface InitializedEventFlow<T> {
     val initialValue: T
     fun listenToUpdates(update: (mapper: (T) -> T) -> Unit)
 }
-
-fun initializedIssueListEventFlow(
-    scope: CoroutineScope,
-    initializedIssueListUpdates: InitializedListUpdates<Issue, Int, IssueChangedEvent>,
-) = InitializedListEventFlow(
-    scope,
-    initializedIssueListUpdates,
-    Issue::id,
-    Issue::updateWith,
-)
-
-fun initializedUserEventFlow(
-    scope: CoroutineScope,
-    initializedUserListUpdates: InitializedListUpdates<User, Int, UserChangedEvent>,
-) = InitializedListEventFlow(
-    scope,
-    initializedUserListUpdates,
-    User::id,
-    User::updateWith,
-)
 
 class InitializedListEventFlow<T, ID, E>(
     private val scope: CoroutineScope,
